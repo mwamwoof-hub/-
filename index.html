@@ -300,6 +300,7 @@ const honors=["東","南","西","北","白","發","中"];
 const dragonTiles=["白","發","中"];
 
 let mode=4;
+let gameLength=4;
 let wall=[],hands=[],rivers=[],extracted=[];
 let selected=-1,current=0,finished=false,busy=false;
 let points=[],roundNo=1,gameToken=0,doraIndicator=null;
@@ -350,6 +351,12 @@ function sortTiles(a){
 
 function setMode(n){
  mode=n;
+ document.getElementById("playerModeOptions").hidden=true;
+ document.getElementById("lengthOptions").hidden=false;
+}
+
+function setLength(n){
+ gameLength=n;
  points=Array(activeSeats()).fill(25000);
  document.getElementById("startScreen").hidden=true;
  document.getElementById("gameScreen").hidden=false;
