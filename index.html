@@ -198,6 +198,92 @@ button{cursor:pointer;font:inherit}
  .riichi-notice{font-size:22px;padding:19px 12px}
  .result-panel{padding:15px}
 }
+/* 右上メニュー */
+.top-menu{
+ position:fixed;
+ top:8px;
+ right:10px;
+ z-index:50;
+}
+.top-menu-button{
+ padding:9px 14px;
+ border:1px solid #d2ae58;
+ border-radius:8px;
+ background:#294e40;
+ color:white;
+ font-weight:bold;
+}
+.menu-panel{
+ position:absolute;
+ top:43px;
+ right:0;
+ width:160px;
+ padding:8px;
+ background:#173b2e;
+ border:1px solid #d2ae58;
+ border-radius:10px;
+ box-shadow:0 5px 15px #0009;
+}
+.menu-panel button{
+ display:block;
+ width:100%;
+ margin:4px 0;
+ padding:10px;
+ border:0;
+ border-radius:6px;
+ background:#345d4b;
+ color:white;
+ font-size:13px;
+}
+
+/* 鳴き牌表示 */
+.meld-area{
+ display:flex;
+ justify-content:center;
+ gap:4px;
+ flex-wrap:wrap;
+ min-height:25px;
+ margin:3px 0;
+}
+.meld-group{
+ display:flex;
+ gap:1px;
+ padding:2px;
+ border:1px solid #d5bd7b;
+ border-radius:4px;
+ background:#173b2e;
+}
+.meld-tile{
+ width:19px;
+ height:27px;
+ background:#f5f0dc;
+ color:#222;
+ border-radius:2px;
+ display:flex;
+ align-items:center;
+ justify-content:center;
+ font-size:12px;
+ font-weight:bold;
+}
+.call-actions{
+ display:flex;
+ justify-content:center;
+ flex-wrap:wrap;
+ gap:7px;
+ margin-bottom:7px;
+}
+.call-actions button{
+ padding:10px 16px;
+ border:0;
+ border-radius:7px;
+ background:#d1ae5e;
+ color:#1c2c23;
+ font-weight:bold;
+}
+.call-actions .skip-call{
+ background:#52645a;
+ color:white;
+}
 </style>
 </head>
 
@@ -213,6 +299,14 @@ button{cursor:pointer;font:inherit}
  </div>
 
  <div id="lengthOptions" hidden>
+ <div class="top-menu">
+ <button class="top-menu-button" onclick="toggleMenu()">☰ メニュー</button>
+ <div class="menu-panel" id="menuPanel" hidden>
+  <button onclick="newGame();toggleMenu()">新しい局</button>
+  <button onclick="sortHand();toggleMenu()">牌を整理</button>
+  <button onclick="returnToMenu()">モード選択</button>
+ </div>
+</div>
   <div class="start-subtitle">対局形式を選択</div>
   <div class="mode-select">
    <button onclick="setLength(4)">東風戦</button>
@@ -294,12 +388,6 @@ button{cursor:pointer;font:inherit}
    <button id="tsumoButton" class="win-button" onclick="playerTsumo()" hidden>ツモ</button>
    <button id="passRonButton" class="pass-button" onclick="passRon()" hidden>見逃す</button>
    <button id="discard" onclick="playerDiscard()">打牌</button>
-  </div>
-
-  <div class="subactions">
-   <button onclick="newGame()">新しい局</button>
-   <button onclick="sortHand()">牌を整理</button>
-   <button class="menu-button" onclick="returnToMenu()">モード選択</button>
   </div>
  </div>
 </div>
