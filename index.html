@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="ja">
 <head>
@@ -24,8 +25,8 @@ button{cursor:pointer;font:inherit}
 .left{left:5px;top:38%;width:30%}
 .right{right:5px;top:38%;width:30%}
 .bottom{bottom:7px;left:50%;transform:translateX(-50%);width:95%}
-.backhand{display:flex;justify-content:center;gap:2px}
-.back{width:11px;height:21px;border:1px solid #d4c08b;background:#286c50;border-radius:2px}
+.backhand{display:flex;justify-content:center;gap:2px;align-items:center;min-height:24px}
+.back{width:21px;height:11px;border:1px solid #d4c08b;background:#286c50;border-radius:2px;transform:rotate(90deg);flex:0 0 21px}
 .river{display:flex;flex-wrap:wrap;justify-content:center;align-content:flex-start;gap:2px;width:100%;max-width:140px;min-height:20px}
 .left .river,.right .river{max-width:110px}
 .tile{flex:0 0 auto;width:clamp(21px,6.1vw,31px);height:clamp(38px,10vw,49px);background:#f5f0dc;color:#222;border:1px solid #b8ad91;border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:clamp(13px,3.8vw,20px);font-weight:bold;box-shadow:0 2px 2px #0006}
@@ -36,13 +37,18 @@ button{cursor:pointer;font:inherit}
 .center{position:absolute;top:43%;left:50%;transform:translate(-50%,-50%);text-align:center;width:35%;pointer-events:none}
 .round{color:#f6e5ad;font-size:16px}
 .centerinfo{font-size:11px;margin-top:7px}
-.dora-area{position:absolute;top:7px;left:50%;transform:translateX(-50%);display:flex;align-items:center;gap:6px;z-index:2;white-space:nowrap}
-.dora-label{font-size:11px;color:#f3dfa1;font-weight:bold}
-.dora-tile{width:25px;height:35px;background:#f5f0dc;color:#2566b4;border:1px solid #b8ad91;border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:bold}
+.dora-area{position:absolute;top:7px;left:50%;transform:translateX(-50%);display:flex;align-items:center;justify-content:center;gap:5px;z-index:2;white-space:nowrap}
+.dora-label{font-size:10px;color:#f3dfa1;font-weight:bold}
+.dora-tile{width:25px;height:35px;background:#f5f0dc;color:#2566b4;border:1px solid #b8ad91;border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:bold}
+.dora-arrow{font-size:14px;color:#f3dfa1;font-weight:bold}
+.dora-result{display:flex;flex-direction:column;align-items:center;gap:1px}
+.dora-result-label{font-size:9px;color:#ffe18b;font-weight:bold}
 .north-area,.meld-area{display:flex;justify-content:center;gap:3px;flex-wrap:wrap;min-height:20px;margin:3px 0}
 .north-tile{background:#f5f0dc;color:#2566b4;border-radius:3px;padding:3px 5px;font-weight:bold;font-size:12px}
+.meld-area{align-items:center}
 .meld-group{display:flex;gap:1px;padding:2px;border:1px solid #d5bd7b;border-radius:4px;background:#173b2e}
 .meld-tile{width:19px;height:27px;background:#f5f0dc;color:#222;border-radius:2px;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:bold}
+#meld0{position:absolute;right:0;bottom:0;justify-content:flex-end;max-width:55%;z-index:3}
 .handarea{position:fixed;bottom:0;left:0;right:0;background:#172d26;padding:9px 3px calc(10px + env(safe-area-inset-bottom));border-top:2px solid #8b7047;z-index:5}
 .handtitle{display:flex;justify-content:space-between;padding:0 7px 7px;font-size:12px;color:#e6d5a6}
 .hand{display:flex;justify-content:center;gap:2px;overflow-x:auto;padding:4px 0 9px}
@@ -69,7 +75,7 @@ button{cursor:pointer;font:inherit}
 .result-line{display:flex;justify-content:space-between;gap:10px;padding:4px 0;font-size:13px}
 .result-close{display:block;width:100%;margin-top:15px;padding:11px;border:0;border-radius:8px;background:#d1ae5e;color:#1c2c23;font-weight:bold}
 @media(max-height:700px){.table{height:400px}.center{top:47%}}
-@media(max-width:360px){.left,.right{width:29%}.center{width:34%}.actions button{padding:8px 9px}.hand .drawn-tile{margin-left:8px}}
+@media(max-width:360px){.left,.right{width:29%}.center{width:34%}.actions button{padding:8px 9px}.hand .drawn-tile{margin-left:8px}.dora-tile{width:22px;height:32px;font-size:13px}.dora-label{font-size:9px}}
 </style>
 </head>
 <body>
@@ -106,9 +112,17 @@ button{cursor:pointer;font:inherit}
    <button onclick="returnToMenu()">モード選択</button>
   </div>
  </div>
- <div class="status" id="status">対局準備中</div>
+ <div class="status" id="status"></div>
  <div class="table">
-  <div class="dora-area"><span class="dora-label">ドラ表示牌</span><div class="dora-tile" id="doraIndicator">?</div></div>
+  <div class="dora-area">
+   <span class="dora-label">ドラ表示牌</span>
+   <div class="dora-tile" id="doraIndicator">?</div>
+   <span class="dora-arrow">▶</span>
+   <div class="dora-result">
+    <span class="dora-result-label">ドラ</span>
+    <div class="dora-tile" id="doraTile">?</div>
+   </div>
+  </div>
   <div class="player top" id="player3">
    <div class="name">CPU 3</div><div class="player-score" id="playerScore3">25000点</div>
    <div class="backhand" id="back3"></div><div class="north-area" id="north3"></div>
@@ -132,7 +146,7 @@ button{cursor:pointer;font:inherit}
   <div class="center">
    <div class="round" id="round">東一局</div>
    <div style="font-size:25px;margin:6px">🀄</div>
-   <div id="wallinfo">残り牌：0</div><div class="centerinfo" id="score">あなた 25000点</div>
+   <div id="wallinfo">残り牌：0</div>
   </div>
  </div>
  <div class="handarea">
@@ -192,6 +206,15 @@ function sortTiles(a){
  const order={m:0,p:1,s:2,z:3};
  a.sort((x,y)=>order[x.s]-order[y.s]||(x.s==="z"?honors.indexOf(x.n)-honors.indexOf(y.n):x.n-y.n));
 }
+function nextDora(t){
+ if(t.s==="z"){
+  let i=honors.indexOf(t.n);
+  if(i<=3)return {s:"z",n:honors[(i+1)%4]};
+  return {s:"z",n:honors[4+(i-4+1)%3]};
+ }
+ if(mode===3&&t.s==="m")return {s:"m",n:t.n===1?9:1};
+ return {s:t.s,n:t.n===9?1:t.n+1};
+}
 function setMode(n){mode=n;document.getElementById("playerModeOptions").hidden=true;document.getElementById("lengthOptions").hidden=false}
 function setLength(n){
  gameLength=n;points=Array(activeSeats()).fill(25000);roundNo=1;dealer=0;honba=0;riichiSticks=0;matchFinished=false;
@@ -230,8 +253,10 @@ function newGame(){
  drawFor(dealer);hands.forEach(sortTiles);
  document.getElementById("player3").style.display=mode===4?"flex":"none";
  document.getElementById("doraIndicator").textContent=label(doraIndicator);
- status(dealer===0?"あなたが親です。":"親のCPUが対局を開始します。");update();
- setTimeout(()=>{if(token!==gameToken||finished)return;if(dealer===0){busy=false;status("あなたの番です。牌を選んでください。");update()}else cpuTurn(token,true)},400);
+ document.getElementById("doraTile").textContent=label(nextDora(doraIndicator));
+ status("");
+ update();
+ setTimeout(()=>{if(token!==gameToken||finished)return;if(dealer===0){busy=false;status("");update()}else cpuTurn(token,true)},400);
 }
 function drawFor(p){if(!wall.length)return false;let t=wall.pop();hands[p].push(t);drawnTile[p]=t;if(p===0)temporaryFuriten[p]=false;return true}
 function drawnIndex(p){return drawnTile[p]?hands[p].indexOf(drawnTile[p]):-1}
@@ -343,7 +368,6 @@ function update(){
  }
  document.getElementById("count").textContent=hands[0].length+"枚";
  document.getElementById("wallinfo").textContent="残り牌："+wall.length;
- document.getElementById("score").textContent="あなた "+points[0]+"点";
  document.getElementById("round").textContent=roundLabel()+(honba?" "+honba+"本場":"");
  for(let p=0;p<activeSeats();p++){
   let river=document.getElementById("river"+p);river.innerHTML="";
@@ -369,8 +393,8 @@ function update(){
  document.getElementById("ankanButton").hidden=!ankan||riichi[0]||!myTurn;
  let canRi=selected>=0&&canRiichiAfterDiscard(hands[0],selected,0);
  document.getElementById("riichiButton").hidden=riichi[0]||!canRi||pendingRon;
- let tsumo=canAgari(hands[0],null,0,true);
- document.getElementById("tsumoButton").hidden=!tsumo||pendingRon;
+ let ts=canAgari(hands[0],null,0,true);
+ document.getElementById("tsumoButton").hidden=!ts||pendingRon;
  document.getElementById("ronButton").hidden=!(pendingRon&&pendingRon.player===0);
  document.getElementById("passRonButton").hidden=!(pendingRon&&pendingRon.player===0);
  document.getElementById("discard").disabled=!myTurn||hands[0].length!==14-melds[0].length*3||selected<0||(riichi[0]&&selected!==drawnIndex(0));
@@ -457,14 +481,12 @@ function getCallOptions(p,t,discarder){
 }
 function afterDiscard(discarder,t,token){
  if(token!==gameToken||finished)return;
- // ロンを最優先で確認
  for(let step=1;step<activeSeats();step++){
   let p=(discarder+step)%activeSeats();if(p===0&&temporaryFuriten[0])continue;
   let r=canAgari(hands[p],t,p,false);if(!r)continue;
   if(p===0){pendingRon={player:0,discarder,tile:t,result:r,token};busy=false;status("ロンできます！");update();return}
   winGame(p,"ロン",r,discarder);return;
  }
- // ポン・カンをチーより優先して順番に判定
  let candidates=[];
  for(let step=1;step<activeSeats();step++){
   let p=(discarder+step)%activeSeats(),opts=getCallOptions(p,t,discarder);
@@ -476,9 +498,7 @@ function afterDiscard(discarder,t,token){
  });
  if(!candidates.length){advanceTurn(discarder,token);return}
  let c=candidates[0];
- if(c.p===0){
-  callPending={player:0,discarder,tile:t,options:c.opts,token};busy=false;status("鳴くことができます。");update();return;
- }
+ if(c.p===0){callPending={player:0,discarder,tile:t,options:c.opts,token};busy=false;status("鳴くことができます。");update();return}
  let call=c.opts.includes("kan")?"kan":c.opts.includes("pon")?"pon":"chi";
  executeCall(c.p,call,discarder,t,token);
 }
@@ -488,7 +508,6 @@ function playerCall(type){
 }
 function skipCall(){
  if(!callPending)return;let c=callPending;callPending=null;busy=true;status("鳴きませんでした。");
- // 他のCPUに鳴き候補があるか再確認（ロン以外）
  let candidates=[];
  for(let step=1;step<activeSeats();step++){
   let p=(c.discarder+step)%activeSeats();if(p===0)continue;
@@ -543,7 +562,6 @@ function advanceTurn(discarder,token){
 function playerRon(){if(!pendingRon||pendingRon.player!==0)return;let r=pendingRon.result,l=pendingRon.discarder;pendingRon=null;winGame(0,"ロン",r,l)}
 function passRon(){
  if(!pendingRon)return;let c=pendingRon;pendingRon=null;temporaryFuriten[0]=true;busy=true;status("ロンを見逃しました。");
- // 見逃し後は次の順番へ進める
  advanceTurn(c.discarder,c.token);update();
 }
 function playerTsumo(){if(finished||busy||current!==0)return;let r=canAgari(hands[0],null,0,true);if(r)winGame(0,"ツモ",r)}
@@ -589,7 +607,7 @@ function startPlayerTurn(){
   busy=true;status("リーチ中：自動ツモ切りします。");update();let token=gameToken;
   setTimeout(()=>{if(token!==gameToken||finished)return;let i=drawnIndex(0);if(i<0)return;let t=hands[0].splice(i,1)[0];drawnTile[0]=null;rivers[0].push(t);busy=true;update();afterDiscard(0,t,token)},450);return;
  }
- busy=false;status(ts?"ツモできます！":"あなたの番です。牌を選んでください。");update();
+ busy=false;status(ts?"ツモできます！":"");update();
 }
 function sortHand(){if(finished||busy||pendingRon||callPending||riichi[0])return;sortTiles(hands[0]);selected=-1;update()}
 function endGame(s){finished=true;busy=false;pendingRon=null;callPending=null;status(s);update()}
