@@ -790,7 +790,8 @@ function playerNorth(){
 
  if(!drawFor(0)){endGame("補充牌がありません。流局です。");return}
  sortTiles(hands[0]);
- log("北抜きの補充牌をツモしました。");
+
+ /* 補充牌をツモしたというログは表示しない */
  status("あなたの番です。");
  update();
 }
@@ -1068,7 +1069,6 @@ function startPlayerTurn(){
  if(riichi[0]&&!tsumo){
   busy=true;
   status("リーチ中：自動ツモ切りします。");
-  log("リーチ後の自動ツモ切りです。");
   update();
 
   const token=gameToken;
@@ -1085,7 +1085,8 @@ function startPlayerTurn(){
    drawnTile[0]=null;
    rivers[0].push(t);
 
-   log("あなた：リーチ後の自動ツモ切り "+label(t));
+   /* 自動ツモ切りも通常の打牌ログと同じ表示 */
+   log("あなた："+label(t)+"を打牌");
    busy=true;
    update();
    afterDiscard(0,t,token);
