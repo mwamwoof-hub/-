@@ -5,216 +5,108 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
 <meta name="theme-color" content="#123c30">
-<title>MAHJONG QUEST</title>
+<title>麻雀</title>
 
 <style>
 *{box-sizing:border-box}
 body{
- margin:0;
- background:#102b24;
- color:white;
+ margin:0;background:#102b24;color:white;
  font-family:Arial,"Noto Sans JP",sans-serif;
  user-select:none;
 }
 button{cursor:pointer;font:inherit}
-
-header{
- text-align:center;
- padding:12px;
- background:#10251f;
-}
+header{text-align:center;padding:12px;background:#10251f}
 h1{margin:0;color:#e5c77a;font-size:21px}
-
-.menu{
- display:flex;
- justify-content:center;
- gap:8px;
- padding:9px;
- background:#193a30;
-}
+.menu{display:flex;justify-content:center;gap:8px;padding:9px;background:#193a30}
 .menu button{
- padding:9px 15px;
- border:1px solid #80998b;
- border-radius:8px;
- background:#294e40;
- color:white;
+ padding:9px 15px;border:1px solid #80998b;
+ border-radius:8px;background:#294e40;color:white;
 }
-.menu .active{
- background:#d2ae58;
- color:#172b22;
-}
-
-.status{
- text-align:center;
- padding:9px;
- color:#f1d98c;
- font-weight:bold;
- min-height:36px;
-}
-
+.menu .active{background:#d2ae58;color:#172b22}
+.status{text-align:center;padding:9px;color:#f1d98c;font-weight:bold;min-height:36px}
 .table{
- position:relative;
- width:96%;
- max-width:480px;
- height:470px;
- margin:5px auto;
- background:radial-gradient(ellipse,#26815b,#125039);
- border:9px solid #704b2e;
- border-radius:24px;
+ position:relative;width:96%;max-width:480px;height:470px;
+ margin:5px auto;background:radial-gradient(ellipse,#26815b,#125039);
+ border:9px solid #704b2e;border-radius:24px;
  box-shadow:0 5px 18px #0008;
 }
-
-.player{
- position:absolute;
- display:flex;
- flex-direction:column;
- align-items:center;
- gap:4px;
- font-size:12px;
-}
+.player{position:absolute;display:flex;flex-direction:column;align-items:center;gap:4px;font-size:12px}
 .name{color:#f5e3a8;font-weight:bold}
-
-.top{
- top:7px;
- left:50%;
- transform:translateX(-50%);
-}
+.top{top:7px;left:50%;transform:translateX(-50%)}
 .left{left:4px;top:40%}
 .right{right:4px;top:40%}
-
-.backhand{
- display:flex;
- gap:2px;
-}
-.back{
- width:11px;
- height:21px;
- border:1px solid #d4c08b;
- background:#286c50;
- border-radius:2px;
-}
-
-.river{
- display:flex;
- flex-wrap:wrap;
- justify-content:center;
- gap:2px;
- max-width:135px;
-}
-
+.backhand{display:flex;gap:2px}
+.back{width:11px;height:21px;border:1px solid #d4c08b;background:#286c50;border-radius:2px}
+.river{display:flex;flex-wrap:wrap;justify-content:center;gap:2px;max-width:135px}
 .tile{
- flex:0 0 auto;
- width:clamp(21px,6.1vw,31px);
+ flex:0 0 auto;width:clamp(21px,6.1vw,31px);
  height:clamp(38px,10vw,49px);
- background:#f5f0dc;
- color:#222;
- border:1px solid #b8ad91;
- border-radius:4px;
- display:flex;
- align-items:center;
- justify-content:center;
- font-size:clamp(13px,3.8vw,20px);
- font-weight:bold;
+ background:#f5f0dc;color:#222;border:1px solid #b8ad91;
+ border-radius:4px;display:flex;align-items:center;justify-content:center;
+ font-size:clamp(13px,3.8vw,20px);font-weight:bold;
  box-shadow:0 2px 2px #0006;
 }
-.smalltile{
- width:19px;
- height:26px;
- font-size:12px;
-}
+.smalltile{width:19px;height:26px;font-size:12px}
 .red{color:#c52b27}
 .green{color:#168348}
 .blue{color:#2566b4}
-
-.selected{
- transform:translateY(-8px);
- border:2px solid #e9b94e;
-}
-
+.selected{transform:translateY(-8px);border:2px solid #e9b94e}
 .center{
- position:absolute;
- top:39%;
- left:50%;
- transform:translate(-50%,-50%);
- text-align:center;
- width:60%;
+ position:absolute;top:39%;left:50%;
+ transform:translate(-50%,-50%);text-align:center;width:60%;
 }
 .round{color:#f6e5ad;font-size:16px}
 .centerinfo{font-size:12px;margin-top:7px}
-
-.log{
- margin:8px auto 190px;
- width:94%;
- max-width:460px;
- height:55px;
- overflow:auto;
- background:#172d26;
- border-radius:8px;
- padding:7px;
- font-size:11px;
- color:#c6d6c9;
+.north-area{
+ margin-top:7px;
+ display:flex;justify-content:center;gap:3px;
+ flex-wrap:wrap;min-height:25px;
 }
-
+.north-label{font-size:10px;color:#f3dfa1}
+.north-tile{
+ background:#f5f0dc;color:#2566b4;
+ border-radius:3px;padding:3px 5px;
+ font-weight:bold;font-size:12px;
+}
+.log{
+ margin:8px auto 210px;width:94%;max-width:460px;
+ height:55px;overflow:auto;background:#172d26;
+ border-radius:8px;padding:7px;font-size:11px;color:#c6d6c9;
+}
 .handarea{
- position:fixed;
- bottom:0;
- left:0;
- right:0;
- background:#172d26;
+ position:fixed;bottom:0;left:0;right:0;background:#172d26;
  padding:9px 3px calc(10px + env(safe-area-inset-bottom));
- border-top:2px solid #8b7047;
- z-index:5;
+ border-top:2px solid #8b7047;z-index:5;
 }
 .handtitle{
- display:flex;
- justify-content:space-between;
- padding:0 7px 7px;
- font-size:12px;
- color:#e6d5a6;
+ display:flex;justify-content:space-between;
+ padding:0 7px 7px;font-size:12px;color:#e6d5a6;
 }
-.hand{
- display:flex;
- justify-content:center;
- gap:2px;
- overflow-x:auto;
- padding:4px 0 9px;
-}
-.actions,.subactions{
- display:flex;
- justify-content:center;
- gap:7px;
- flex-wrap:wrap;
-}
+.hand{display:flex;justify-content:center;gap:2px;overflow-x:auto;padding:4px 0 9px}
+.actions,.subactions{display:flex;justify-content:center;gap:7px;flex-wrap:wrap}
 .actions button{
- padding:10px 25px;
- border:0;
- border-radius:7px;
- background:#d1ae5e;
- color:#1c2c23;
- font-weight:bold;
+ padding:10px 25px;border:0;border-radius:7px;
+ background:#d1ae5e;color:#1c2c23;font-weight:bold;
 }
 .actions button:disabled{opacity:.35}
+.actions .north-button{
+ background:#397eaf;color:white;border:1px solid #9cc9e8;
+}
+.actions .north-button:disabled{opacity:.35}
 .subactions{margin-top:7px}
 .subactions button{
- padding:7px 12px;
- background:#345d4b;
- color:white;
- border:1px solid #8ca696;
- border-radius:7px;
- font-size:12px;
+ padding:7px 12px;background:#345d4b;color:white;
+ border:1px solid #8ca696;border-radius:7px;font-size:12px;
 }
-
-@media(max-height:700px){
- .table{height:380px}
-}
+@media(max-height:700px){.table{height:380px}}
 </style>
 </head>
 
 <body>
 
 <header>
-<h1>🀄 MAHJONG QUEST</h1>
-<small>REALISTIC JAPANESE MAHJONG</small>
+<h1>🀄 麻雀 🀄</h1>
+<small>MAHJONG</small>
 </header>
 
 <div class="menu">
@@ -249,14 +141,13 @@ h1{margin:0;color:#e5c77a;font-size:21px}
   <div style="font-size:27px;margin:8px">🀄</div>
   <div id="wallinfo">残り牌：0</div>
   <div class="centerinfo" id="score">あなた 25000点</div>
-  <div class="centerinfo" id="turninfo">対局準備中</div>
+  <div class="centerinfo">あなたの抜きドラ</div>
+  <div class="north-area" id="north0"></div>
  </div>
 
 </div>
 
-<div class="log" id="log">
-対局を開始してください。
-</div>
+<div class="log" id="log">対局を開始してください。</div>
 
 <div class="handarea">
 
@@ -268,6 +159,9 @@ h1{margin:0;color:#e5c77a;font-size:21px}
  <div class="hand" id="hand"></div>
 
  <div class="actions">
+  <button id="northButton" class="north-button" onclick="playerNorth()">
+   北抜き
+  </button>
   <button id="discard" onclick="playerDiscard()">打牌</button>
  </div>
 
@@ -285,6 +179,7 @@ let mode=4;
 let wall=[];
 let hands=[];
 let rivers=[];
+let extracted=[];
 let selected=-1;
 let current=0;
 let finished=false;
@@ -314,16 +209,12 @@ function makeWall(){
    :[1,2,3,4,5,6,7,8,9];
 
   nums.forEach(n=>{
-   for(let i=0;i<4;i++){
-    a.push({s,n});
-   }
+   for(let i=0;i<4;i++)a.push({s,n});
   });
  }
 
  honors.forEach(n=>{
-  for(let i=0;i<4;i++){
-   a.push({s:"z",n});
-  }
+  for(let i=0;i<4;i++)a.push({s:"z",n});
  });
 
  return shuffle(a);
@@ -389,13 +280,15 @@ function newGame(){
  wall=makeWall();
 
  hands=Array.from(
-  {length:activeSeats()},
-  ()=>[]
+  {length:activeSeats()},()=>[]
  );
 
  rivers=Array.from(
-  {length:activeSeats()},
-  ()=>[]
+  {length:activeSeats()},()=>[]
+ );
+
+ extracted=Array.from(
+  {length:activeSeats()},()=>[]
  );
 
  selected=-1;
@@ -415,19 +308,16 @@ function newGame(){
 
  log("新しい局を開始しました。");
 
- if(mode===4){
-  document.getElementById("player3").style.display="flex";
- }else{
-  document.getElementById("player3").style.display="none";
- }
+ document.getElementById("player3").style.display=
+  mode===4?"flex":"none";
 
  status("あなたが自動ツモ中...");
-
  update();
 
- // 最初のプレイヤーのツモ
+ const token=gameToken;
+
  setTimeout(()=>{
-  if(finished)return;
+  if(token!==gameToken||finished)return;
 
   if(!drawFor(0)){
    endGame("流局です。");
@@ -440,7 +330,6 @@ function newGame(){
 
   log("あなたが自動ツモしました。");
   status("あなたの番です。牌を選んで打牌してください。");
-
   update();
  },400);
 }
@@ -449,13 +338,15 @@ function drawFor(p){
  if(wall.length===0)return false;
 
  hands[p].push(wall.pop());
-
  return true;
+}
+
+function isNorth(t){
+ return t.s==="z"&&t.n==="北";
 }
 
 function update(){
  const el=document.getElementById("hand");
-
  el.innerHTML="";
 
  hands[0].forEach((t,i)=>{
@@ -489,12 +380,25 @@ function update(){
  document.getElementById("round").textContent=
   "東"+["一","二","三","四"][(roundNo-1)%4]+"局";
 
- for(let p=1;p<4;p++){
-  const backs=document.getElementById("back"+p);
-  const river=document.getElementById("river"+p);
+ // CPUとあなたの捨て牌を別々に表示
+ for(let p=0;p<activeSeats();p++){
+  let riverId=p===0?"river0":"river"+p;
+  let river=document.getElementById(riverId);
 
-  backs.innerHTML="";
   river.innerHTML="";
+
+  rivers[p].forEach(t=>{
+   let d=document.createElement("div");
+   d.className="tile smalltile "+color(t);
+   d.textContent=label(t);
+   river.appendChild(d);
+  });
+ }
+
+ // CPUの手牌表示
+ for(let p=1;p<4;p++){
+  let backs=document.getElementById("back"+p);
+  backs.innerHTML="";
 
   if(p>=activeSeats())continue;
 
@@ -503,35 +407,70 @@ function update(){
    b.className="back";
    backs.appendChild(b);
   });
-
-  rivers[p].forEach(t=>{
-   let d=document.createElement("div");
-
-   d.className="tile smalltile "+color(t);
-   d.textContent=label(t);
-
-   river.appendChild(d);
-  });
  }
 
- const humanRiver=document.getElementById("river1");
- humanRiver.innerHTML="";
+ // 北抜き表示
+ const northArea=document.getElementById("north0");
+ northArea.innerHTML="";
 
- rivers[0].forEach(t=>{
+ extracted[0].forEach(()=>{
   let d=document.createElement("div");
-
-  d.className="tile smalltile "+color(t);
-  d.textContent=label(t);
-
-  humanRiver.appendChild(d);
+  d.className="north-tile";
+  d.textContent="北";
+  northArea.appendChild(d);
  });
 
+ // 北抜きボタン
+ const hasNorth=hands[0].some(isNorth);
+
+ document.getElementById("northButton").style.display=
+  mode===3?"block":"none";
+
+ document.getElementById("northButton").disabled=
+  mode!==3||finished||busy||
+  current!==0||hands[0].length!==14||!hasNorth;
+
  document.getElementById("discard").disabled=
-  finished||
-  busy||
-  current!==0||
-  hands[0].length!==14||
-  selected<0;
+  finished||busy||current!==0||
+  hands[0].length!==14||selected<0;
+}
+
+function playerNorth(){
+ if(mode!==3||finished||busy||
+    current!==0||hands[0].length!==14)return;
+
+ const index=hands[0].findIndex(isNorth);
+
+ if(index<0){
+  status("手牌に北がありません。");
+  return;
+ }
+
+ // 北を手牌から抜く
+ hands[0].splice(index,1);
+ extracted[0].push({s:"z",n:"北"});
+
+ selected=-1;
+
+ log("あなた：北を抜きドラにしました。");
+
+ status("北を抜きました。補充牌をツモします。");
+
+ update();
+
+ // 今回は通常の山牌から補充
+ if(!drawFor(0)){
+  endGame("補充牌がありません。流局です。");
+  return;
+ }
+
+ sortTiles(hands[0]);
+
+ log("北抜きの補充牌をツモしました。");
+
+ status("あなたの番です。牌を選んで打牌してください。");
+
+ update();
 }
 
 function playerDiscard(){
@@ -586,8 +525,7 @@ function chooseDiscard(h){
    for(let j=0;j<h.length;j++){
     const q=h[j];
 
-    if(q.s===t.s&&
-       Math.abs(q.n-t.n)<=2&&i!==j){
+    if(q.s===t.s&&Math.abs(q.n-t.n)<=2&&i!==j){
      near++;
     }
    }
@@ -608,6 +546,24 @@ function chooseDiscard(h){
  return best;
 }
 
+function cpuNorth(p){
+ if(mode!==3)return false;
+
+ const index=hands[p].findIndex(isNorth);
+
+ if(index<0)return false;
+
+ hands[p].splice(index,1);
+ extracted[p].push({s:"z",n:"北"});
+
+ log("CPU "+p+"：北を抜きドラにしました。");
+
+ // 抜いた北の補充牌
+ if(!drawFor(p))return false;
+
+ return true;
+}
+
 function cpuTurn(token){
  if(token!==gameToken||finished)return;
 
@@ -626,6 +582,22 @@ function cpuTurn(token){
 
  sortTiles(hands[p]);
 
+ // 三人麻雀なら北を抜く
+ if(mode===3){
+  let guard=0;
+
+  while(hands[p].some(isNorth)&&guard<4){
+   guard++;
+
+   if(!cpuNorth(p)){
+    endGame("補充牌がなくなりました。流局です。");
+    return;
+   }
+
+   sortTiles(hands[p]);
+  }
+ }
+
  // CPUが牌を選んで打牌
  const i=chooseDiscard(hands[p]);
  const t=hands[p].splice(i,1)[0];
@@ -638,14 +610,12 @@ function cpuTurn(token){
 
  update();
 
- // 次のCPUへ
  if(current<activeSeats()){
   setTimeout(()=>{
    if(token!==gameToken)return;
    cpuTurn(token);
   },500);
  }else{
-  // CPU全員終了後、自動であなたがツモ
   setTimeout(()=>{
    if(token!==gameToken)return;
    startPlayerTurn();
@@ -687,10 +657,8 @@ function sortHand(){
 function endGame(s){
  finished=true;
  busy=false;
-
  status(s);
  log(s);
-
  update();
 }
 
