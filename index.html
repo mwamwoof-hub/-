@@ -113,6 +113,9 @@ h1{margin:0;color:#e5c77a;font-size:21px}
  display:flex;justify-content:center;gap:2px;
  overflow-x:auto;padding:4px 0 9px;
 }
+.hand .drawn-tile{
+ margin-left:13px;
+}
 .actions,.subactions{
  display:flex;justify-content:center;gap:7px;flex-wrap:wrap;
 }
@@ -138,6 +141,7 @@ h1{margin:0;color:#e5c77a;font-size:21px}
  .left,.right{width:29%}.center{width:34%}
  .smalltile{width:15px;height:22px;font-size:10px}
  .actions button{padding:9px 11px}
+ .hand .drawn-tile{margin-left:10px}
 }
 </style>
 </head>
@@ -252,7 +256,12 @@ let riichi=[];
 let riichiPending=false;
 let riichiSticks=0;
 let pendingRon=null;
-let lastDrawnIndex=[];
+
+/* ツモ牌そのものを保存する。並べ替えても位置を特定できる */
+let drawnTile=[];
+
+/* ロン見逃しによる一時フリテン */
+let temporaryFuriten=[];
 
 function activeSeats(){return mode===4?4:3}
 
@@ -320,7 +329,8 @@ function newGame(){
  rivers=Array.from({length:activeSeats()},()=>[]);
  extracted=Array.from({length:activeSeats()},()=>[]);
  riichi=Array(activeSeats()).fill(false);
- lastDrawnIndex=Array(activeSeats()).fill(-1);
+ drawnTile=Array(activeSeats()).fill(null);
+ temporaryFuriten=Array(activeSeats()).fill(false);
 
  selected=-1;
  current=0;
@@ -358,9 +368,16 @@ function newGame(){
 
 function drawFor(p){
  if(wall.length===0)return false;
- hands[p].push(wall.pop());
- lastDrawnIndex[p]=hands[p].length-1;
+ const t=wall.pop();
+ hands[p].push(t);
+ drawnTile[p]=t;
+ if(p===0)temporaryFuriten[p]=false;
  return true;
+}
+
+function drawnIndex(p){
+ if(!drawnTile[p])return -1;
+ return hands[p].indexOf(drawnTile[p]);
 }
 
 /* 手牌のアガリ形を調べる */
@@ -377,12 +394,10 @@ function getAgariPatterns(hand){
  const keys=Object.keys(counts);
  const patterns=[];
 
- // 七対子
  if(keys.length===7&&keys.every(k=>counts[k]===2)){
   patterns.push({sevenPairs:true,groups:[]});
  }
 
- // 通常形：雀頭＋4面子
  for(const pair of keys){
   if(counts[pair]<2)continue;
   counts[pair]-=2;
@@ -407,7 +422,6 @@ function makeMelds(counts,tiles,groups){
  const k=keys[0];
  const t=tiles[k];
 
- // 刻子
  if(counts[k]>=3){
   counts[k]-=3;
   groups.push({type:"triplet",tile:t});
@@ -416,7 +430,6 @@ function makeMelds(counts,tiles,groups){
   counts[k]+=3;
  }
 
- // 順子
  if(t.s!=="z"&&t.n<=7){
   const k2=t.s+(t.n+1);
   const k3=t.s+(t.n+2);
@@ -486,13 +499,108 @@ function allPossibleTiles(){
 
 function isTenpai(hand,p){
  if(hand.length!==13)return false;
- for(const t of allPossibleTiles()){
-  if(canAgari(hand,t,p,false))return true;
-  // 形だけのテンパイも判定する
-  const test=[...hand,t];
-  if(getAgariPatterns(test).length)return true;
+ return calculateShanten(hand)===0;
+}
+
+/*
+ シャンテン数計算。
+ 面子・塔子・雀頭の組み合わせを探索し、
+ 通常手と七対子のうち良い方を採用する。
+*/
+function calculateShanten(hand){
+ const counts=Array(34).fill(0);
+
+ hand.forEach(t=>{
+  const i=tileIndex(t);
+  if(i>=0)counts[i]++;
+ });
+
+ let best=8;
+ const memo=new Map();
+
+ function dfs(melds,taatsu,pair){
+  while(melds>4)melds=4;
+  if(taatsu>4-melds)taatsu=4-melds;
+
+  let i=counts.findIndex(v=>v>0);
+  if(i===-1){
+   const value=8-melds*2-taatsu-pair;
+   if(value<best)best=value;
+   return;
+  }
+
+  const state=counts.join("")+"|"+melds+"|"+taatsu+"|"+pair;
+  if(memo.has(state))return;
+  memo.set(state,true);
+
+  /* 1枚を孤立牌として使わない */
+  counts[i]--;
+  dfs(melds,taatsu,pair);
+  counts[i]++;
+
+  /* 刻子 */
+  if(counts[i]>=3&&melds<4){
+   counts[i]-=3;
+   dfs(melds+1,taatsu,pair);
+   counts[i]+=3;
+  }
+
+  /* 順子 */
+  if(i<27&&i%9<=6&&counts[i+1]>0&&counts[i+2]>0&&melds<4){
+   counts[i]--;
+   counts[i+1]--;
+   counts[i+2]--;
+   dfs(melds+1,taatsu,pair);
+   counts[i]++;
+   counts[i+1]++;
+   counts[i+2]++;
+  }
+
+  /* 雀頭または対子塔子 */
+  if(counts[i]>=2){
+   counts[i]-=2;
+   if(pair===0)dfs(melds,taatsu,1);
+   else dfs(melds,taatsu+1,pair);
+   counts[i]+=2;
+  }
+
+  /* 両面・嵌張・辺張 */
+  if(i<27&&i%9<=7&&counts[i+1]>0){
+   counts[i]--;
+   counts[i+1]--;
+   dfs(melds,taatsu+1,pair);
+   counts[i]++;
+   counts[i+1]++;
+  }
+
+  if(i<27&&i%9<=6&&counts[i+2]>0){
+   counts[i]--;
+   counts[i+2]--;
+   dfs(melds,taatsu+1,pair);
+   counts[i]++;
+   counts[i+2]++;
+  }
  }
- return false;
+
+ dfs(0,0,0);
+
+ /* 七対子シャンテン */
+ let pairs=0;
+ let unique=0;
+ counts.forEach(c=>{
+  if(c>0)unique++;
+  if(c>=2)pairs++;
+ });
+ const chiitoi=6-pairs+Math.max(0,7-unique);
+
+ return Math.min(best,chiitoi);
+}
+
+function tileIndex(t){
+ if(t.s==="m")return t.n-1;
+ if(t.s==="p")return 9+t.n-1;
+ if(t.s==="s")return 18+t.n-1;
+ return 27+honors.indexOf(t.n);
 }
 
 function canRiichiAfterDiscard(hand,index,p){
@@ -507,19 +615,35 @@ function update(){
  if(!el)return;
  el.innerHTML="";
 
+ /* ツモ牌以外を先に表示 */
+ const drawn=drawnTile[0];
  hands[0].forEach((t,i)=>{
+  if(t===drawn)return;
   const d=document.createElement("div");
   d.className="tile "+color(t)+(selected===i?" selected":"");
   d.textContent=label(t);
-
   d.onclick=()=>{
    if(current!==0||busy||finished||pendingRon||hands[0].length!==14)return;
-   if(riichi[0]&&i!==lastDrawnIndex[0])return;
+   if(riichi[0]&&i!==drawnIndex(0))return;
    selected=i;
    update();
   };
   el.appendChild(d);
  });
+
+ /* ツモ牌は右端に独立して表示 */
+ if(drawn&&hands[0].includes(drawn)){
+  const i=hands[0].indexOf(drawn);
+  const d=document.createElement("div");
+  d.className="tile "+color(drawn)+" drawn-tile"+(selected===i?" selected":"");
+  d.textContent=label(drawn);
+  d.onclick=()=>{
+   if(current!==0||busy||finished||pendingRon||hands[0].length!==14)return;
+   selected=i;
+   update();
+  };
+  el.appendChild(d);
+ }
 
  document.getElementById("count").textContent=hands[0].length+"枚";
  document.getElementById("wallinfo").textContent="残り牌："+wall.length;
@@ -595,7 +719,7 @@ function update(){
  document.getElementById("discard").disabled=
   finished||busy||current!==0||pendingRon||
   hands[0].length!==14||selected<0||
-  (riichi[0]&&selected!==lastDrawnIndex[0]);
+  (riichi[0]&&selected!==drawnIndex(0));
 }
 
 function isNorth(t){return t.s==="z"&&t.n==="北"}
@@ -607,7 +731,9 @@ function playerNorth(){
  const index=hands[0].findIndex(isNorth);
  if(index<0)return;
 
- hands[0].splice(index,1);
+ const removed=hands[0].splice(index,1)[0];
+ if(removed===drawnTile[0])drawnTile[0]=null;
+
  extracted[0].push({s:"z",n:"北"});
  selected=-1;
 
@@ -635,7 +761,7 @@ function playerRiichi(){
 function playerDiscard(){
  if(finished||busy||current!==0||pendingRon||
     hands[0].length!==14||selected<0)return;
- if(riichi[0]&&selected!==lastDrawnIndex[0])return;
+ if(riichi[0]&&selected!==drawnIndex(0))return;
 
  if(riichiPending){
   if(!canRiichiAfterDiscard(hands[0],selected,0))return;
@@ -647,6 +773,7 @@ function playerDiscard(){
  }
 
  const t=hands[0].splice(selected,1)[0];
+ drawnTile[0]=null;
  rivers[0].push(t);
  selected=-1;
  busy=true;
@@ -657,29 +784,48 @@ function playerDiscard(){
  afterDiscard(0,t,gameToken);
 }
 
+/* CPUの打牌選択。シャンテン数を優先して牌を選ぶ */
 function chooseDiscard(h,p){
- if(riichi[p])return lastDrawnIndex[p]>=0?lastDrawnIndex[p]:h.length-1;
+ if(riichi[p]){
+  const index=drawnIndex(p);
+  return index>=0?index:h.length-1;
+ }
 
- const counts={};
- h.forEach(t=>{counts[key(t)]=(counts[key(t)]||0)+1});
+ let best=0;
+ let bestScore=Infinity;
 
- let best=0,bestScore=999;
  for(let i=0;i<h.length;i++){
-  const t=h[i],k=key(t);
-  let score=0;
-  if(counts[k]>=2)score+=8;
-  if(t.s==="z")score+=counts[k]===1?0:4;
-  else{
+  const test=h.slice();
+  const t=test.splice(i,1)[0];
+
+  const shanten=calculateShanten(test);
+
+  const same=test.filter(q=>key(q)===key(t)).length;
+  let keepValue=0;
+
+  /* 対子・近い数牌は残す */
+  if(same>=1)keepValue+=8;
+
+  if(t.s==="z"){
+   if(same===0)keepValue-=2;
+   else keepValue+=4;
+  }else{
    let near=0;
-   for(let j=0;j<h.length;j++){
-    const q=h[j];
-    if(q.s===t.s&&Math.abs(q.n-t.n)<=2&&i!==j)near++;
+   for(const q of test){
+    if(q.s===t.s&&Math.abs(q.n-t.n)===1)near+=2;
+    else if(q.s===t.s&&Math.abs(q.n-t.n)===2)near++;
    }
-   score+=near*3;
-   if(t.n===1||t.n===9)score+=1;
+   keepValue+=near;
+   if(t.n===1||t.n===9)keepValue-=1;
   }
-  score+=Math.random()*0.2;
-  if(score<bestScore){bestScore=score;best=i}
+
+  /* シャンテン数を最優先、同じなら不要牌を捨てる */
+  const score=shanten*100-keepValue+Math.random()*0.1;
+
+  if(score<bestScore){
+   bestScore=score;
+   best=i;
+  }
  }
  return best;
 }
@@ -688,7 +834,8 @@ function cpuNorth(p){
  if(mode!==3||riichi[p])return false;
  const index=hands[p].findIndex(isNorth);
  if(index<0)return false;
- hands[p].splice(index,1);
+ const removed=hands[p].splice(index,1)[0];
+ if(removed===drawnTile[p])drawnTile[p]=null;
  extracted[p].push({s:"z",n:"北"});
  log("CPU "+p+"：北を抜きました。");
  if(!drawFor(p))return false;
@@ -724,10 +871,11 @@ function cpuTurn(token){
 
   const i=chooseDiscard(hands[p],p);
   const t=hands[p].splice(i,1)[0];
+  drawnTile[p]=null;
   rivers[p].push(t);
   log("CPU "+p+"："+label(t)+"を打牌");
 
-  // CPUのリーチ判定
+  /* 13枚で聴牌していればリーチ */
   if(!riichi[p]&&points[p]>=1000&&isTenpai(hands[p],p)){
    riichi[p]=true;
    points[p]-=1000;
@@ -744,12 +892,16 @@ function cpuTurn(token){
  }
 }
 
+/* 捨て牌に対するロン判定 */
 function afterDiscard(discarder,t,token){
  if(token!==gameToken||finished)return;
 
- // 捨て牌に対するロン判定
  for(let step=1;step<activeSeats();step++){
   const p=(discarder+step)%activeSeats();
+
+  /* 一時フリテン中はロンできない */
+  if(p===0&&temporaryFuriten[0])continue;
+
   const result=canAgari(hands[p],t,p,false);
   if(!result)continue;
 
@@ -766,13 +918,24 @@ function afterDiscard(discarder,t,token){
   }
  }
 
+ advanceTurn(discarder,token);
+}
+
+/* 次のプレイヤーへ進む */
+function advanceTurn(discarder,token){
+ if(token!==gameToken||finished)return;
+
  current=(discarder+1)%activeSeats();
 
  if(current===0){
-  setTimeout(()=>{if(token===gameToken)startPlayerTurn()},350);
+  setTimeout(()=>{
+   if(token===gameToken)startPlayerTurn();
+  },350);
  }else{
   busy=true;
-  setTimeout(()=>{if(token===gameToken)cpuTurn(token)},450);
+  setTimeout(()=>{
+   if(token===gameToken)cpuTurn(token);
+  },450);
  }
 }
 
@@ -783,21 +946,38 @@ function playerRon(){
  winGame(0,"ロン",r);
 }
 
+/*
+ ロンを見逃した場合：
+ 一時フリテンにし、見逃した人より後のCPUにも
+ ロンできる牌かどうかを確認してから手番を進める。
+*/
 function passRon(){
  if(!pendingRon||pendingRon.player!==0)return;
+
  const discarder=pendingRon.discarder;
  const token=pendingRon.token;
+
  pendingRon=null;
- log("あなた：ロンを見逃しました。");
- current=(discarder+1)%activeSeats();
+ temporaryFuriten[0]=true;
+
+ log("あなた：ロンを見逃しました。一時フリテンです。");
+ status("ロンを見逃しました。");
+
+ /* 見逃したプレイヤーより後のCPUのロンを確認 */
+ for(let step=1;step<activeSeats();step++){
+  const p=(0+step)%activeSeats();
+  if(p===discarder)break;
+
+  const result=canAgari(hands[p],rivers[discarder][rivers[discarder].length-1],p,false);
+  if(result){
+   winGame(p,"ロン",result);
+   return;
+  }
+ }
+
  busy=true;
  update();
-
- if(current===0){
-  setTimeout(()=>{if(token===gameToken)startPlayerTurn()},350);
- }else{
-  setTimeout(()=>{if(token===gameToken)cpuTurn(token)},450);
- }
+ advanceTurn(discarder,token);
 }
 
 function playerTsumo(){
