@@ -946,6 +946,595 @@ function sortHand(){
  if(finished||busy||pendingRon||callPending||riichi[0])return;
  sortTiles(hands[0]);selected=-1;lastTapIndex=-1;lastTapTime=0;update();
 }
-</script>
 
+ // ===== 修正版：和了形の全パターン取得 =====
+
+function makeMelds(counts, tiles, groups, need, results) {
+  let i = counts.findIndex(v => v > 0);
+
+  if (i < 0) {
+    if (groups.length === need) {
+      results.push(groups.map(g => ({...g})));
+    }
+    return;
+  }
+
+  if (groups.length >= need) return;
+
+  // 刻子
+  if (counts[i] >= 3) {
+    counts[i] -= 3;
+    groups.push({type:"pon", tile:tiles[i]});
+    makeMelds(counts, tiles, groups, need, results);
+    groups.pop();
+    counts[i] += 3;
+  }
+
+  // 順子
+  if (i < 27 && i % 9 <= 6 &&
+      counts[i+1] > 0 && counts[i+2] > 0) {
+    counts[i]--;
+    counts[i+1]--;
+    counts[i+2]--;
+
+    groups.push({type:"chi", tile:tiles[i]});
+    makeMelds(counts, tiles, groups, need, results);
+    groups.pop();
+
+    counts[i]++;
+    counts[i+1]++;
+    counts[i+2]++;
+  }
+}
+
+function getAgariPatterns(hand, openCount=0) {
+  if (hand.length !== 14 - openCount * 3) return [];
+
+  let counts = Array(34).fill(0);
+  let tiles = Array(34);
+
+  hand.forEach(t => {
+    let i = tileIndex(t);
+    counts[i]++;
+    tiles[i] = t;
+  });
+
+  let out = [];
+  let need = 4 - openCount;
+
+  // 七対子
+  if (openCount === 0 &&
+      counts.filter(x => x === 2).length === 7 &&
+      counts.every(x => x === 0 || x === 2)) {
+    out.push({
+      sevenPairs:true,
+      pair:null,
+      groups:[]
+    });
+  }
+
+  // 通常形：すべての分解を取得
+  for (let i=0; i<34; i++) {
+    if (counts[i] < 2) continue;
+
+    counts[i] -= 2;
+
+    let results = [];
+    makeMelds(counts, tiles, [], need, results);
+
+    results.forEach(groups => {
+      out.push({
+        sevenPairs:false,
+        pair:tiles[i],
+        groups
+      });
+    });
+
+    counts[i] += 2;
+  }
+
+  return out;
+}
+
+// ===== 待ち判定 =====
+
+function patternWait(pattern, winningTile) {
+  if (pattern.sevenPairs) return "tanki";
+  if (!winningTile) return "";
+
+  let groups = pattern.groups || [];
+
+  for (let g of groups) {
+    if (g.type !== "chi" || g.tile.s !== winningTile.s) continue;
+
+    let n = g.tile.n;
+    let w = winningTile.n;
+
+    if (w === n + 1) return "kanchan";
+    if (n === 1 && w === 3) return "penchan";
+    if (n === 7 && w === 7) return "penchan";
+  }
+
+  // 雀頭で和了した場合
+  if (pattern.pair &&
+      key(pattern.pair) === key(winningTile)) {
+    return "tanki";
+  }
+
+  return "ryanmen";
+}
+
+function isRyanmen(pattern, t) {
+  if (!t || pattern.sevenPairs) return false;
+
+  return patternWait(pattern, t) === "ryanmen";
+}
+
+// ===== 役満判定の修正 =====
+
+function yakumanCheck(all, pattern, groups, p) {
+  let y = [];
+  let counts = {};
+
+  all.forEach(t => {
+    counts[key(t)] = (counts[key(t)] || 0) + 1;
+  });
+
+  // 国士無双
+  if (all.length === 14 && !pattern.sevenPairs) {
+    let required = [
+      "m1","m9","p1","p9","s1","s9",
+      "z東","z南","z西","z北","z白","z發","z中"
+    ];
+
+    let unique = new Set(all.map(key));
+
+    if (required.every(k => unique.has(k)) &&
+        required.some(k => counts[k] === 2)) {
+      y.push("国士無双");
+    }
+  }
+
+  // 字一色
+  if (all.every(t => t.s === "z")) {
+    y.push("字一色");
+  }
+
+  // 清老頭
+  if (all.every(t => t.s !== "z" &&
+      (t.n === 1 || t.n === 9))) {
+    y.push("清老頭");
+  }
+
+  // 緑一色
+  let greenTiles = new Set([
+    "s2","s3","s4","s6","s8","z發"
+  ]);
+
+  if (all.every(t => greenTiles.has(key(t)))) {
+    y.push("緑一色");
+  }
+
+  // 四暗刻
+  let concealed = groups.filter(g =>
+    g.type === "pon" && !g.open
+  ).length;
+
+  if (concealed === 4 && pattern.pair) {
+    y.push("四暗刻");
+  }
+
+  // 大三元
+  if (["白","發","中"].every(n =>
+    groups.some(g =>
+      g.type === "pon" &&
+      g.tile.s === "z" &&
+      g.tile.n === n
+    )
+  )) {
+    y.push("大三元");
+  }
+
+  // 四喜和
+  let windCount = ["東","南","西","北"].filter(n =>
+    groups.some(g =>
+      g.type === "pon" &&
+      g.tile.s === "z" &&
+      g.tile.n === n
+    )
+  ).length;
+
+  if (windCount === 4) {
+    y.push("大四喜");
+  } else if (
+    windCount === 3 &&
+    pattern.pair &&
+    pattern.pair.s === "z" &&
+    ["東","南","西","北"].includes(pattern.pair.n)
+  ) {
+    y.push("小四喜");
+  }
+
+  // 四槓子
+  if (groups.filter(g => g.kan).length === 4) {
+    y.push("四槓子");
+  }
+
+  // 九蓮宝燈（門前・同一色）
+  if (isClosed(p) && all.length === 14) {
+    let suits = new Set(all.map(t => t.s));
+
+    if (suits.size === 1 && !suits.has("z")) {
+      let nums = all.map(t => t.n).sort((a,b)=>a-b);
+      let base = [1,1,1,2,3,4,5,6,7,8,9,9,9];
+      let valid = base.every((n,i)=>nums[i] >= n);
+
+      if (valid) {
+        let countsN = Array(10).fill(0);
+        nums.forEach(n=>countsN[n]++);
+        if (countsN[1]>=3 && countsN[9]>=3 &&
+            [2,3,4,5,6,7,8].every(n=>countsN[n]>=1)) {
+          y.push("九蓮宝燈");
+        }
+      }
+    }
+  }
+
+  return y;
+}
+// ===== 修正版：役判定・符計算・点数計算 =====
+
+function evaluatePattern(hand, pattern, p, isTsumo, winningTile) {
+  let all = allTilesFor(hand, p);
+  let groups = groupList(pattern, p);
+  let closed = isClosed(p);
+  let yaku = [];
+
+  const add = (name, han) => yaku.push({name, han});
+
+  if (pattern.sevenPairs) add("七対子", 2);
+  if (closed && riichi[p]) add("リーチ", 1);
+  if (closed && isTsumo) add("門前ツモ", 1);
+
+  // タンヤオ
+  if (all.every(isSimple)) add("タンヤオ", 1);
+
+  // 役牌
+  let dragonGroups = groups.filter(g =>
+    g.type === "pon" && g.tile.s === "z" &&
+    dragonTiles.includes(g.tile.n)
+  );
+
+  [...new Set(dragonGroups.map(g=>g.tile.n))]
+    .forEach(n=>add("役牌 "+n,1));
+
+  groups.filter(g=>g.type==="pon" && g.tile.s==="z")
+    .forEach(g=>{
+      if (g.tile.n === seatWind(p)) add("自風牌",1);
+      if (g.tile.n === "東") add("場風牌",1);
+    });
+
+  if (!pattern.sevenPairs) {
+    let seq = groups.filter(g=>g.type==="chi");
+    let trip = groups.filter(g=>g.type==="pon");
+    let pair = pattern.pair;
+
+    // 平和
+    let valueHead = valuePair(pair,p);
+    if (closed && seq.length===4 && valueHead===0 &&
+        isRyanmen(pattern,winningTile)) {
+      add("平和",1);
+    }
+
+    // 一盃口・二盃口
+    if (closed) {
+      let keys = seq.map(g=>g.tile.s+g.tile.n);
+      let counts = {};
+      keys.forEach(k=>counts[k]=(counts[k]||0)+1);
+      let pairs = Object.values(counts).reduce(
+        (sum,n)=>sum+Math.floor(n/2),0
+      );
+
+      if (pairs>=2) add("二盃口",3);
+      else if (pairs===1) add("一盃口",1);
+    }
+
+    if (trip.length===4) add("対々和",2);
+
+    let concealedTrip = trip.filter(g=>!g.open).length;
+    if (concealedTrip>=3) add("三暗刻",2);
+
+    if (groups.filter(g=>g.kan).length>=3) add("三槓子",2);
+
+    // 混老頭
+    if (all.every(isYaochu) && all.some(t=>t.s==="z")) {
+      add("混老頭",2);
+    }
+
+    // 混全帯么九
+    if (groups.some(g=>g.type==="chi") &&
+        all.every(isYaochu) &&
+        all.some(t=>t.s==="z")) {
+      add("混全帯么九",closed?2:1);
+    }
+
+    // 純全帯么九
+    if (groups.some(g=>g.type==="chi") &&
+        all.every(t=>t.s!=="z") &&
+        groups.every(g=>{
+          if (g.type==="pon") return isTerminal(g.tile);
+          return g.tile.n===1 || g.tile.n===7;
+        }) &&
+        (pair.s!=="z" && isTerminal(pair))) {
+      add("純全帯么九",closed?3:2);
+    }
+
+    // 混一色・清一色
+    let suits = new Set(all.filter(t=>t.s!=="z").map(t=>t.s));
+    let honorsExist = all.some(t=>t.s==="z");
+
+    if (suits.size===1 && honorsExist) {
+      add("混一色",closed?3:2);
+    } else if (suits.size===1 && !honorsExist) {
+      add("清一色",closed?6:5);
+    }
+
+    // 三色同順
+    let seqBySuit = {m:[],p:[],s:[]};
+    seq.forEach(g=>seqBySuit[g.tile.s].push(g.tile.n));
+
+    if ([1,2,3,4,5,6,7].some(n=>
+      seqBySuit.m.includes(n) &&
+      seqBySuit.p.includes(n) &&
+      seqBySuit.s.includes(n)
+    )) {
+      add("三色同順",closed?2:1);
+    }
+
+    // 一気通貫
+    if (["m","p","s"].some(s=>
+      [1,4,7].every(n=>seqBySuit[s].includes(n))
+    )) {
+      add("一気通貫",closed?2:1);
+    }
+
+    // 三色同刻
+    let tripByNum = {};
+    trip.filter(g=>g.tile.s!=="z").forEach(g=>{
+      (tripByNum[g.tile.n] ||= []).push(g.tile.s);
+    });
+
+    if (Object.values(tripByNum).some(a=>
+      new Set(a).size===3
+    )) add("三色同刻",2);
+
+    // 小三元
+    if (dragonGroups.length===2 &&
+        pair && pair.s==="z" &&
+        dragonTiles.includes(pair.n)) {
+      add("小三元",2);
+    }
+  }
+
+  // 役満
+  let yakuman = yakumanCheck(all,pattern,groups,p);
+  if (yakuman.length) {
+    return {
+      yaku:yakuman.map(name=>({name,han:13})),
+      han:13,
+      fu:0,
+      yakuman:true
+    };
+  }
+
+  // ドラのみでは和了できない
+  if (!yaku.length) return null;
+
+  let dora = countDora(all,[doraIndicator]);
+
+  // 三麻の抜き北は1枚につき1翻
+  if (mode===3) dora += extracted[p].length;
+
+  if (dora>0) yaku.push({name:"ドラ",han:dora});
+
+  let han = yaku.reduce((sum,x)=>sum+x.han,0);
+  let fu = calculateFu(pattern,groups,p,isTsumo,winningTile,yaku);
+
+  return {yaku,han,fu,yakuman:false};
+}
+
+// ===== 符計算 =====
+
+function calculateFu(pattern,groups,p,isTsumo,winningTile,yaku) {
+  if (pattern.sevenPairs) return 25;
+
+  let closed = isClosed(p);
+  let fu = 20;
+
+  if (!isTsumo && closed) fu += 10;
+  if (isTsumo) fu += 2;
+
+  fu += valuePair(pattern.pair,p);
+
+  let wait = patternWait(pattern,winningTile);
+  if (["kanchan","penchan","tanki"].includes(wait)) fu += 2;
+
+  groups.forEach(g=>{
+    if (g.type!=="pon") return;
+
+    let ya = isYaochu(g.tile);
+    let base = g.kan ? (ya?32:16) : (ya?8:4);
+
+    if (g.open) base /= 2;
+    fu += base;
+  });
+
+  if (yaku.some(y=>y.name==="平和")) {
+    return isTsumo ? 20 : 30;
+  }
+
+  // 門前ロン30符などの例外を除き10符単位に切り上げ
+  return Math.ceil(fu/10)*10;
+}
+
+// ===== 最高得点の和了形を採用 =====
+
+function canAgari(hand,extra,p,isTsumo) {
+  let full = extra ? [...hand,extra] : hand.slice();
+  let patterns = getAgariPatterns(full,melds[p].length);
+  let best = null;
+
+  for (let pattern of patterns) {
+    let r = evaluatePattern(
+      full,pattern,p,isTsumo,extra||drawnTile[p]
+    );
+
+    if (!r) continue;
+
+    let score = basicPoints(r.han,r.fu);
+    let rank = r.yakuman ? 1000000 : score;
+
+    if (!best || rank>best.rank) {
+      best = {...r,pattern,hand:full,rank};
+    }
+  }
+
+  if (best) delete best.rank;
+  return best;
+}
+
+// ===== ドラ枚数 =====
+
+function countDora(hand,indicators) {
+  let total = 0;
+
+  indicators.filter(Boolean).forEach(ind=>{
+    let d = nextDora(ind);
+    hand.forEach(t=>{
+      if (key(t)===key(d)) total++;
+    });
+  });
+
+  hand.forEach(t=>{
+    if (t.red) total++;
+  });
+
+  return total;
+}
+
+// ===== 点数計算 =====
+
+function basicPoints(han,fu) {
+  if (han>=13) return 8000;
+  if (han>=11) return 6000;
+  if (han>=8) return 4000;
+  if (han>=6) return 3000;
+  if (han>=5) return 2000;
+
+  let base = fu * Math.pow(2,han+2);
+  if (base>=2000) return 2000;
+
+  return base;
+}
+
+function calculateScore(result,type,winner,loser) {
+  let base = basicPoints(result.han,result.fu);
+  let transfers = [];
+  let total = 0;
+  let dealerWin = winner===dealer;
+
+  if (type==="ロン") {
+    let pay = round100(base*(dealerWin?6:4));
+    pay += honba*300;
+
+    if (loser!=null) {
+      points[loser]-=pay;
+      points[winner]+=pay;
+      transfers.push({from:loser,to:winner,amount:pay});
+      total=pay;
+    }
+  } else {
+    for (let p=0;p<activeSeats();p++) {
+      if (p===winner) continue;
+
+      let multiplier = dealerWin ? 2 : (p===dealer?2:1);
+      let pay = round100(base*multiplier);
+      pay += honba*100;
+
+      points[p]-=pay;
+      points[winner]+=pay;
+      transfers.push({from:p,to:winner,amount:pay});
+      total+=pay;
+    }
+  }
+
+  return {
+    han:result.han,
+    fu:result.fu,
+    total,
+    transfers
+  };
+}
+// ===== 追加ドラ管理 =====
+
+let kanDoraIndicators = [];
+let uraDoraIndicators = [];
+
+function resetExtraDora() {
+  kanDoraIndicators = [];
+  uraDoraIndicators = [];
+}
+
+function getAllDoraIndicators(p) {
+  let indicators = [doraIndicator,...kanDoraIndicators];
+
+  // リーチ和了時のみ裏ドラを加算
+  if (riichi[p]) {
+    indicators = indicators.concat(uraDoraIndicators);
+  }
+
+  return indicators;
+}
+
+function countDora(hand, indicators) {
+  let total = 0;
+
+  indicators.filter(Boolean).forEach(ind => {
+    let d = nextDora(ind);
+
+    hand.forEach(t => {
+      if (key(t) === key(d)) total++;
+    });
+  });
+
+  hand.forEach(t => {
+    if (t.red) total++;
+  });
+
+  return total;
+}
+
+// 新しい局では追加ドラをリセット
+const originalNewGame = newGame;
+newGame = function() {
+  resetExtraDora();
+  originalNewGame();
+};
+
+// ドラ表示を更新
+function updateDoraDisplay() {
+  let area = document.getElementById("doraArea");
+  if (!area) return;
+
+  document.getElementById("doraIndicator").textContent =
+    label(doraIndicator);
+
+  document.getElementById("doraTile").textContent =
+    label(nextDora(doraIndicator));
+}
+
+// ===== HTML終了 ====
+</script>
+</body>
+</html>
  
