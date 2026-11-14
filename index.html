@@ -206,9 +206,18 @@ button{cursor:pointer;font:inherit}
 <div class="start-screen" id="startScreen">
  <div class="start-title">対局モードを選択</div>
  <div class="start-subtitle">プレイする麻雀の種類を選んでください</div>
- <div class="mode-select">
+
+ <div class="mode-select" id="playerModeOptions">
   <button onclick="setMode(4)">四人麻雀</button>
   <button onclick="setMode(3)">三人麻雀</button>
+ </div>
+
+ <div id="lengthOptions" hidden>
+  <div class="start-subtitle">対局形式を選択</div>
+  <div class="mode-select">
+   <button onclick="setLength(4)">東風戦</button>
+   <button onclick="setLength(8)">半荘戦</button>
+  </div>
  </div>
 </div>
 
