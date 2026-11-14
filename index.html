@@ -464,7 +464,14 @@ function playerDiscard(){
  let declaring=riichiPending;
  if(declaring){if(!canRiichiAfterDiscard(hands[0],selected,0))return;points[0]-=1000;riichiSticks++;riichi[0]={double:turnCount===0,ippatsu:true};ippatsu[0]=true;riichiPending=false}
  let t=hands[0].splice(selected,1)[0];drawnTile[0]=null;rivers[0].push(t);
- if(declaring)riichiTile[0]=t;selected=-1;busy=true;lastDiscardWasKan=false;status("CPUが対局中...");update();
+ if(declaring)riichiTile[0]=t;
+firstTurn[0]=false;
+turnCount++;
+selected=-1;
+busy=true;
+lastDiscardWasKan=false;
+status("CPUが対局中...");
+update();
  let token=gameToken;
  if(declaring){showNotice("リーチ！","あなたがリーチを宣言しました");afterNotice(()=>afterDiscard(0,t,token),token)}
  else afterDiscard(0,t,token);
