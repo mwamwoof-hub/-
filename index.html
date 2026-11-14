@@ -313,12 +313,33 @@ let gameLength=4;
 let wall=[],hands=[],rivers=[],extracted=[];
 let selected=-1,current=0,finished=false,busy=false;
 let points=[],roundNo=1,gameToken=0,doraIndicator=null;
+let dealer=0,honba=0;
+let nextHandTimer=null;
+let matchFinished=false;
 let riichi=[],riichiPending=false,riichiSticks=0,pendingRon=null;
 let drawnTile=[],temporaryFuriten=[],riichiTile=[];
 let riichiNoticeTimer=null;
 let riichiNoticeUntil=0;
 
-function activeSeats(){return mode===4?4:3}
+function maxRounds(){
+ return activeSeats()*(gameLength===4?1:2);
+}
+
+function roundLabel(){
+ const seats=activeSeats();
+ const windIndex=Math.floor((roundNo-1)/seats);
+ const handIndex=(roundNo-1)%seats;
+ const winds=["東","南"];
+ const numbers=["一","二","三","四"];
+
+ return (winds[windIndex]||"終了")+numbers[handIndex]+"局";
+}
+
+function seatWind(p){
+ return ["東","南","西","北"][
+  (p-dealer+activeSeats())%activeSeats()
+ ];
+}
 
 function shuffle(a){
  for(let i=a.length-1;i>0;i--){
@@ -367,20 +388,36 @@ function setMode(n){
 function setLength(n){
  gameLength=n;
  points=Array(activeSeats()).fill(25000);
+
+ roundNo=1;
+ dealer=0;
+ honba=0;
+ riichiSticks=0;
+ matchFinished=false;
+
  document.getElementById("startScreen").hidden=true;
  document.getElementById("gameScreen").hidden=false;
+
  newGame();
 }
 
 function returnToMenu(){
  gameToken++;
+ clearTimeout(nextHandTimer);
  finished=true;
  busy=false;
  pendingRon=null;
+
  hideRiichiNotice();
+
  document.getElementById("resultPanel").hidden=true;
  document.getElementById("gameScreen").hidden=true;
  document.getElementById("startScreen").hidden=false;
+
+ document.getElementById("playerModeOptions").hidden=false;
+ document.getElementById("lengthOptions").hidden=true;
+
+ matchFinished=false;
 }
 
 function status(s){document.getElementById("status").textContent=s}
@@ -416,7 +453,15 @@ function hideRiichiNotice(){
 }
 
 function closeResult(){
+ clearTimeout(nextHandTimer);
  document.getElementById("resultPanel").hidden=true;
+
+ if(matchFinished){
+  returnToMenu();
+  return;
+ }
+
+ newGame();
 }
 
 function newGame(){
@@ -679,8 +724,8 @@ function update(){
  document.getElementById("count").textContent=hands[0].length+"枚";
  document.getElementById("wallinfo").textContent="残り牌："+wall.length;
  document.getElementById("score").textContent="あなた "+points[0]+"点";
- document.getElementById("round").textContent="東"+["一","二","三","四"][(roundNo-1)%4]+"局";
-
+ document.getElementById("round").textContent=
+ roundLabel()+(honba>0?" "+honba+"本場":"");
  for(let p=0;p<activeSeats();p++){
   const river=document.getElementById("river"+p);
   if(river){
@@ -729,6 +774,17 @@ function update(){
   const scoreEl=document.getElementById("playerScore"+p);
   if(scoreEl)scoreEl.textContent=points[p].toLocaleString()+"点";
  }
+ document.querySelector("#player3 .name").textContent=
+ "CPU 3（"+seatWind(3%activeSeats())+"）";
+
+document.querySelector(".left .name").textContent=
+ "CPU 1（"+seatWind(1)+"）";
+
+document.querySelector(".right .name").textContent=
+ "CPU 2（"+seatWind(2%activeSeats())+"）";
+
+document.querySelector(".bottom .name").textContent=
+ "あなた（"+seatWind(0)+"）";
 
  const hasNorth=hands[0].some(isNorth);
  const northButton=document.getElementById("northButton");
@@ -982,7 +1038,7 @@ function calculateFu(result,type,winner){
  if(pattern.sevenPairs)return 25;
 
  let fu=20;
- if(type==="ロン"&&winner===0)fu+=10;
+ if(type==="ロン")fu+=10;
  if(type==="ツモ")fu+=2;
 
  if(pattern.pair&&pattern.pair.s==="z"){
@@ -1000,7 +1056,7 @@ function calculateFu(result,type,winner){
  return Math.ceil(fu/10)*10;
 }
 
-function calculateScore(result,type,winner){
+function calculateScore(result,type,winner,loser){
  const han=result.yaku.length;
  const fu=calculateFu(result,type,winner);
  let base=fu*Math.pow(2,han+2);
@@ -1011,26 +1067,25 @@ function calculateScore(result,type,winner){
  else if(han>=6)base=3000;
  else if(han>=5||base>=2000)base=2000;
 
- const dealer=winner===0;
+ const winnerIsDealer=winner===dealer;
  const transfers=[];
  let total=0;
 
  if(type==="ロン"){
-  const loser=pendingRon&&pendingRon.player===0?pendingRon.discarder:null;
-  const actualLoser=loser===null?arguments[3]:loser;
-  const payment=round100(base*(dealer?6:4));
-  if(actualLoser!==undefined&&actualLoser!==null){
-   points[actualLoser]-=payment;
-   points[winner]+=payment;
-   transfers.push({from:actualLoser,to:winner,amount:payment});
-   total=payment;
-  }
+  const payment=round100(base*(winnerIsDealer?6:4));
+
+if(loser!==undefined&&loser!==null){
+ points[loser]-=payment;
+ points[winner]+=payment;
+ transfers.push({from:loser,to:winner,amount:payment});
+ total=payment;
+}
  }else{
   for(let p=0;p<activeSeats();p++){
    if(p===winner)continue;
    let payment;
-   if(dealer)payment=round100(base*2);
-   else payment=round100(base*(p===0?2:1));
+   if(winnerIsDealer)payment=round100(base*2);
+   else payment=round100(base*(p===dealer?2:1));
    points[p]-=payment;
    points[winner]+=payment;
    transfers.push({from:p,to:winner,amount:payment});
@@ -1086,8 +1141,24 @@ function showResult(winner,type,result,score){
  panel.hidden=false;
 }
 
+ function advanceRound(winner){
+ if(winner===dealer){
+  // 親の連荘
+  honba++;
+ }else{
+  // 子の和了：親交代
+  dealer=(dealer+1)%activeSeats();
+  roundNo++;
+  honba=0;
+ }
+
+ if(roundNo>maxRounds()){
+  matchFinished=true;
+ }
+}
 function winGame(winner,type,result,loser){
  if(finished)return;
+
  finished=true;
  busy=false;
  pendingRon=null;
@@ -1098,6 +1169,7 @@ function winGame(winner,type,result,loser){
  if(riichiSticks>0){
   points[winner]+=riichiSticks*1000;
  }
+
  const bonusSticks=riichiSticks;
  riichiSticks=0;
 
@@ -1106,10 +1178,30 @@ function winGame(winner,type,result,loser){
   score.riichiBonus=bonusSticks*1000;
  }
 
+ advanceRound(winner);
+
  const message=playerName(winner)+"の"+type+"！";
  status(message);
  update();
  showResult(winner,type,result,score);
+
+ if(matchFinished){
+  document.getElementById("resultTitle").textContent=
+   "対局終了！";
+  document.querySelector(".result-close").textContent=
+   "モード選択";
+ }else{
+  document.querySelector(".result-close").textContent=
+   "次の局へ";
+ }
+
+ const token=gameToken;
+ clearTimeout(nextHandTimer);
+
+ nextHandTimer=setTimeout(()=>{
+  if(token!==gameToken)return;
+  closeResult();
+ },3000);
 }
 
 /* プレイヤーのツモ */
