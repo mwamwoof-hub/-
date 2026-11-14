@@ -421,7 +421,6 @@ function newGame(){
   busy=false;
   selected=-1;
   sortTiles(hands[0]);
-  log("あなたが自動ツモしました。");
   status("あなたの番です。牌を選んでください。");
   update();
  },400);
@@ -1095,7 +1094,6 @@ function startPlayerTurn(){
  }
 
  busy=false;
- log("あなたが自動ツモしました。");
 
  if(tsumo){
   status("ツモできます！");
