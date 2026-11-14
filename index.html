@@ -471,10 +471,10 @@ function newGame(){
  gameToken++;
  const token=gameToken;
  hideRiichiNotice();
- closeResult();
 
  wall=makeWall();
  doraIndicator=wall.pop();
+
  hands=Array.from({length:activeSeats()},()=>[]);
  rivers=Array.from({length:activeSeats()},()=>[]);
  extracted=Array.from({length:activeSeats()},()=>[]);
@@ -484,33 +484,48 @@ function newGame(){
  riichiTile=Array(activeSeats()).fill(null);
 
  selected=-1;
- current=0;
+ current=dealer;
  finished=false;
  busy=true;
  riichiPending=false;
  pendingRon=null;
 
- if(points.length!==activeSeats())points=Array(activeSeats()).fill(25000);
-
- for(let i=0;i<13;i++){
-  for(let p=0;p<activeSeats();p++)hands[p].push(wall.pop());
+ if(points.length!==activeSeats()){
+  points=Array(activeSeats()).fill(25000);
  }
+
+ // 全員に13枚配る
+ for(let i=0;i<13;i++){
+  for(let p=0;p<activeSeats();p++){
+   hands[p].push(wall.pop());
+  }
+ }
+
+ // 親だけ最初から14枚
+ drawFor(dealer);
+
  hands.forEach(sortTiles);
 
- document.getElementById("player3").style.display=mode===4?"flex":"none";
- document.getElementById("doraIndicator").textContent=label(doraIndicator);
+ document.getElementById("player3").style.display=
+  mode===4?"flex":"none";
 
- status("あなたが自動ツモ中...");
+ document.getElementById("doraIndicator").textContent=
+  label(doraIndicator);
+
+ status(dealer===0?"あなたが親です。":"親のCPUが対局を開始します。");
  update();
 
  setTimeout(()=>{
   if(token!==gameToken||finished)return;
-  if(!drawFor(0)){endGame("流局です。");return}
-  busy=false;
-  selected=-1;
-  sortTiles(hands[0]);
-  status("あなたの番です。牌を選んでください。");
-  update();
+
+  if(dealer===0){
+   busy=false;
+   selected=-1;
+   status("あなたの番です。牌を選んでください。");
+   update();
+  }else{
+   cpuTurn(token,true);
+  }
  },400);
 }
 
@@ -913,13 +928,15 @@ function cpuNorth(p){
  return true;
 }
 
-function cpuTurn(token){
+function cpuTurn(token,skipDraw=false){
  if(token!==gameToken||finished||pendingRon)return;
  try{
   const p=current;
-  if(p>=activeSeats()){startPlayerTurn();return}
-  if(!drawFor(p)){endGame("山牌がなくなりました。流局です。");return}
-  sortTiles(hands[p]);
+  if(!skipDraw&&!drawFor(p)){
+  endGame("山牌がなくなりました。流局です。");
+  return;
+}
+sortTiles(hands[p]);
 
   if(mode===3&&!riichi[p]){
    let guard=0;
