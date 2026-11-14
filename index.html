@@ -299,13 +299,7 @@ button{cursor:pointer;font:inherit}
  </div>
 
  <div id="lengthOptions" hidden>
- <div class="top-menu">
- <button class="top-menu-button" onclick="toggleMenu()">☰ メニュー</button>
- <div class="menu-panel" id="menuPanel" hidden>
-  <button onclick="newGame();toggleMenu()">新しい局</button>
-  <button onclick="sortHand();toggleMenu()">牌を整理</button>
-  <button onclick="returnToMenu()">モード選択</button>
- </div>
+
 </div>
   <div class="start-subtitle">対局形式を選択</div>
   <div class="mode-select">
@@ -327,6 +321,13 @@ button{cursor:pointer;font:inherit}
 </div>
 
 <div id="gameScreen" hidden>
+  <div class="top-menu">
+ <button class="top-menu-button" onclick="toggleMenu()">☰ メニュー</button>
+ <div class="menu-panel" id="menuPanel" hidden>
+  <button onclick="newGame();toggleMenu()">新しい局</button>
+  <button onclick="sortHand();toggleMenu()">牌を整理</button>
+  <button onclick="returnToMenu()">モード選択</button>
+ </div>
  <div class="status" id="status">対局準備中</div>
 
  <div class="table">
