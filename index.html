@@ -321,7 +321,10 @@ let drawnTile=[],temporaryFuriten=[],riichiTile=[];
 let riichiNoticeTimer=null;
 let riichiNoticeUntil=0;
 
-function maxRounds(){
+function activeSeats(){
+ return mode===4?4:3;
+}
+ function maxRounds(){
  return activeSeats()*(gameLength===4?1:2);
 }
 
