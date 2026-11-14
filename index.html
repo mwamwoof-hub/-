@@ -35,6 +35,7 @@ h1{margin:0;color:#e5c77a;font-size:21px}
 .top{top:7px;left:50%;transform:translateX(-50%)}
 .left{left:4px;top:40%}
 .right{right:4px;top:40%}
+.bottom{bottom:7px;left:50%;transform:translateX(-50%)}
 .backhand{display:flex;gap:2px}
 .back{width:11px;height:21px;border:1px solid #d4c08b;background:#286c50;border-radius:2px}
 .river{display:flex;flex-wrap:wrap;justify-content:center;gap:2px;max-width:135px}
@@ -98,7 +99,10 @@ h1{margin:0;color:#e5c77a;font-size:21px}
  padding:7px 12px;background:#345d4b;color:white;
  border:1px solid #8ca696;border-radius:7px;font-size:12px;
 }
-@media(max-height:700px){.table{height:380px}}
+@media(max-height:700px){
+ .table{height:380px}
+ .log{margin-bottom:210px}
+}
 </style>
 </head>
 
@@ -134,6 +138,12 @@ h1{margin:0;color:#e5c77a;font-size:21px}
   <div class="name">CPU 1</div>
   <div class="backhand" id="back1"></div>
   <div class="river" id="river1"></div>
+ </div>
+
+ <!-- あなたの捨て牌表示 -->
+ <div class="player bottom">
+  <div class="river" id="river0"></div>
+  <div class="name">あなた</div>
  </div>
 
  <div class="center">
@@ -270,12 +280,14 @@ function status(s){
 
 function log(s){
  const e=document.getElementById("log");
+ if(!e)return;
  e.innerHTML+=s+"<br>";
  e.scrollTop=e.scrollHeight;
 }
 
 function newGame(){
  gameToken++;
+ const token=gameToken;
 
  wall=makeWall();
 
@@ -314,8 +326,6 @@ function newGame(){
  status("あなたが自動ツモ中...");
  update();
 
- const token=gameToken;
-
  setTimeout(()=>{
   if(token!==gameToken||finished)return;
 
@@ -336,7 +346,6 @@ function newGame(){
 
 function drawFor(p){
  if(wall.length===0)return false;
-
  hands[p].push(wall.pop());
  return true;
 }
@@ -347,6 +356,8 @@ function isNorth(t){
 
 function update(){
  const el=document.getElementById("hand");
+ if(!el)return;
+
  el.innerHTML="";
 
  hands[0].forEach((t,i)=>{
@@ -380,10 +391,13 @@ function update(){
  document.getElementById("round").textContent=
   "東"+["一","二","三","四"][(roundNo-1)%4]+"局";
 
- // CPUとあなたの捨て牌を別々に表示
+ // 全員の捨て牌を表示
  for(let p=0;p<activeSeats();p++){
-  let riverId=p===0?"river0":"river"+p;
+  let riverId="river"+p;
   let river=document.getElementById(riverId);
+
+  // 表示場所が存在しない場合もエラーにしない
+  if(!river)continue;
 
   river.innerHTML="";
 
@@ -398,6 +412,8 @@ function update(){
  // CPUの手牌表示
  for(let p=1;p<4;p++){
   let backs=document.getElementById("back"+p);
+  if(!backs)continue;
+
   backs.innerHTML="";
 
   if(p>=activeSeats())continue;
@@ -446,7 +462,6 @@ function playerNorth(){
   return;
  }
 
- // 北を手牌から抜く
  hands[0].splice(index,1);
  extracted[0].push({s:"z",n:"北"});
 
@@ -458,7 +473,6 @@ function playerNorth(){
 
  update();
 
- // 今回は通常の山牌から補充
  if(!drawFor(0)){
   endGame("補充牌がありません。流局です。");
   return;
@@ -558,7 +572,6 @@ function cpuNorth(p){
 
  log("CPU "+p+"：北を抜きドラにしました。");
 
- // 抜いた北の補充牌
  if(!drawFor(p))return false;
 
  return true;
@@ -567,59 +580,65 @@ function cpuNorth(p){
 function cpuTurn(token){
  if(token!==gameToken||finished)return;
 
- const p=current;
+ try{
+  const p=current;
 
- if(p>=activeSeats()){
-  startPlayerTurn();
-  return;
- }
-
- // CPUが自動ツモ
- if(!drawFor(p)){
-  endGame("山牌がなくなりました。流局です。");
-  return;
- }
-
- sortTiles(hands[p]);
-
- // 三人麻雀なら北を抜く
- if(mode===3){
-  let guard=0;
-
-  while(hands[p].some(isNorth)&&guard<4){
-   guard++;
-
-   if(!cpuNorth(p)){
-    endGame("補充牌がなくなりました。流局です。");
-    return;
-   }
-
-   sortTiles(hands[p]);
-  }
- }
-
- // CPUが牌を選んで打牌
- const i=chooseDiscard(hands[p]);
- const t=hands[p].splice(i,1)[0];
-
- rivers[p].push(t);
-
- log("CPU "+p+"："+label(t)+"を打牌");
-
- current++;
-
- update();
-
- if(current<activeSeats()){
-  setTimeout(()=>{
-   if(token!==gameToken)return;
-   cpuTurn(token);
-  },500);
- }else{
-  setTimeout(()=>{
-   if(token!==gameToken)return;
+  if(p>=activeSeats()){
    startPlayerTurn();
-  },400);
+   return;
+  }
+
+  // CPUの自動ツモ
+  if(!drawFor(p)){
+   endGame("山牌がなくなりました。流局です。");
+   return;
+  }
+
+  sortTiles(hands[p]);
+
+  // 三人麻雀なら北を抜く
+  if(mode===3){
+   let guard=0;
+
+   while(hands[p].some(isNorth)&&guard<4){
+    guard++;
+
+    if(!cpuNorth(p)){
+     endGame("補充牌がなくなりました。流局です。");
+     return;
+    }
+
+    sortTiles(hands[p]);
+   }
+  }
+
+  // CPUが牌を選んで打牌
+  const i=chooseDiscard(hands[p]);
+  const t=hands[p].splice(i,1)[0];
+
+  rivers[p].push(t);
+
+  log("CPU "+p+"："+label(t)+"を打牌");
+
+  current++;
+
+  update();
+
+  if(current<activeSeats()){
+   setTimeout(()=>{
+    if(token!==gameToken)return;
+    cpuTurn(token);
+   },500);
+  }else{
+   setTimeout(()=>{
+    if(token!==gameToken)return;
+    startPlayerTurn();
+   },400);
+  }
+
+ }catch(error){
+  console.error(error);
+  endGame("CPU処理でエラーが発生しました。新しい局を開始してください。");
  }
 }
 
