@@ -14,14 +14,50 @@ body{
  font-family:Arial,"Noto Sans JP",sans-serif;user-select:none;
 }
 button{cursor:pointer;font:inherit}
-header{text-align:center;padding:12px;background:#10251f}
-h1{margin:0;color:#e5c77a;font-size:21px}
-.menu{display:flex;justify-content:center;gap:8px;padding:9px;background:#193a30}
-.menu button{
- padding:9px 15px;border:1px solid #80998b;
- border-radius:8px;background:#294e40;color:white;
+
+/* 最初のモード選択画面 */
+.start-screen{
+ min-height:100vh;
+ display:flex;
+ flex-direction:column;
+ align-items:center;
+ justify-content:center;
+ gap:25px;
+ padding:25px;
+ background:radial-gradient(ellipse,#26815b,#102b24);
 }
-.menu .active{background:#d2ae58;color:#172b22}
+.start-title{
+ font-size:24px;
+ color:#f1d98c;
+ font-weight:bold;
+ text-align:center;
+}
+.start-subtitle{
+ font-size:13px;
+ color:#c6d6c9;
+}
+.mode-select{
+ display:flex;
+ flex-direction:column;
+ gap:15px;
+ width:100%;
+ max-width:300px;
+}
+.mode-select button{
+ padding:18px;
+ border:2px solid #d2ae58;
+ border-radius:12px;
+ background:#294e40;
+ color:white;
+ font-size:18px;
+ font-weight:bold;
+}
+.mode-select button:active{
+ background:#d2ae58;
+ color:#172b22;
+}
+
+/* 対局画面 */
 .status{
  text-align:center;padding:9px;color:#f1d98c;
  font-weight:bold;min-height:36px;
@@ -68,6 +104,13 @@ h1{margin:0;color:#e5c77a;font-size:21px}
 .green{color:#168348}
 .blue{color:#2566b4}
 .selected{transform:translateY(-8px);border:2px solid #e9b94e}
+
+/* リーチ宣言牌 */
+.riichi-discard{
+ transform:rotate(90deg);
+ margin:5px 3px;
+}
+
 .center{
  position:absolute;top:43%;left:50%;
  transform:translate(-50%,-50%);
@@ -113,9 +156,7 @@ h1{margin:0;color:#e5c77a;font-size:21px}
  display:flex;justify-content:center;gap:2px;
  overflow-x:auto;padding:4px 0 9px;
 }
-.hand .drawn-tile{
- margin-left:13px;
-}
+.hand .drawn-tile{margin-left:13px}
 .actions,.subactions{
  display:flex;justify-content:center;gap:7px;flex-wrap:wrap;
 }
@@ -133,7 +174,11 @@ h1{margin:0;color:#e5c77a;font-size:21px}
  padding:7px 12px;background:#345d4b;color:white;
  border:1px solid #8ca696;border-radius:7px;font-size:12px;
 }
+.subactions .menu-button{
+ background:#52645a;
+}
 [hidden]{display:none!important}
+
 @media(max-height:700px){
  .table{height:400px}.center{top:47%}.left,.right{top:39%}
 }
@@ -147,91 +192,97 @@ h1{margin:0;color:#e5c77a;font-size:21px}
 </head>
 
 <body>
-<header>
-<h1>🀄 麻雀 🀄</h1>
-<small>MAHJONG</small>
-</header>
 
-<div class="menu">
-<button id="four" class="active" onclick="setMode(4)">四人麻雀</button>
-<button id="three" onclick="setMode(3)">三人麻雀</button>
-</div>
-
-<div class="status" id="status">対局準備中</div>
-
-<div class="table">
- <div class="dora-area">
-  <span class="dora-label">ドラ表示牌</span>
-  <div class="dora-tile" id="doraIndicator">?</div>
- </div>
-
- <div class="player top" id="player3">
-  <div class="name">CPU 3</div>
-  <div class="backhand" id="back3"></div>
-  <div class="north-area" id="north3"></div>
-  <div class="river" id="river3"></div>
- </div>
-
- <div class="player left">
-  <div class="name">CPU 1</div>
-  <div class="backhand" id="back1"></div>
-  <div class="north-area" id="north1"></div>
-  <div class="river" id="river1"></div>
- </div>
-
- <div class="player right">
-  <div class="name">CPU 2</div>
-  <div class="backhand" id="back2"></div>
-  <div class="north-area" id="north2"></div>
-  <div class="river" id="river2"></div>
- </div>
-
- <div class="player bottom">
-  <div class="river" id="river0"></div>
-  <div class="north-area" id="north0"></div>
-  <div class="name">あなた</div>
- </div>
-
- <div class="center">
-  <div class="round" id="round">東一局</div>
-  <div style="font-size:25px;margin:6px">🀄</div>
-  <div id="wallinfo">残り牌：0</div>
-  <div class="centerinfo" id="score">あなた 25000点</div>
+<!-- 最初の画面 -->
+<div class="start-screen" id="startScreen">
+ <div class="start-title">対局モードを選択</div>
+ <div class="start-subtitle">プレイする麻雀の種類を選んでください</div>
+ <div class="mode-select">
+  <button onclick="setMode(4)">四人麻雀</button>
+  <button onclick="setMode(3)">三人麻雀</button>
  </div>
 </div>
 
-<div class="log" id="log">対局を開始してください。</div>
+<!-- 対局画面 -->
+<div id="gameScreen" hidden>
 
-<div class="handarea">
- <div class="handtitle">
-  <span>あなたの手牌</span>
-  <span id="count">0枚</span>
+ <div class="status" id="status">対局準備中</div>
+
+ <div class="table">
+  <div class="dora-area">
+   <span class="dora-label">ドラ表示牌</span>
+   <div class="dora-tile" id="doraIndicator">?</div>
+  </div>
+
+  <div class="player top" id="player3">
+   <div class="name">CPU 3</div>
+   <div class="backhand" id="back3"></div>
+   <div class="north-area" id="north3"></div>
+   <div class="river" id="river3"></div>
+  </div>
+
+  <div class="player left">
+   <div class="name">CPU 1</div>
+   <div class="backhand" id="back1"></div>
+   <div class="north-area" id="north1"></div>
+   <div class="river" id="river1"></div>
+  </div>
+
+  <div class="player right">
+   <div class="name">CPU 2</div>
+   <div class="backhand" id="back2"></div>
+   <div class="north-area" id="north2"></div>
+   <div class="river" id="river2"></div>
+  </div>
+
+  <div class="player bottom">
+   <div class="river" id="river0"></div>
+   <div class="north-area" id="north0"></div>
+   <div class="name">あなた</div>
+  </div>
+
+  <div class="center">
+   <div class="round" id="round">東一局</div>
+   <div style="font-size:25px;margin:6px">🀄</div>
+   <div id="wallinfo">残り牌：0</div>
+   <div class="centerinfo" id="score">あなた 25000点</div>
+  </div>
  </div>
 
- <div class="hand" id="hand"></div>
+ <div class="log" id="log">対局を開始してください。</div>
 
- <div class="actions">
-  <button id="northButton" class="north-button"
-   onclick="playerNorth()" hidden>北抜き</button>
+ <div class="handarea">
+  <div class="handtitle">
+   <span>あなたの手牌</span>
+   <span id="count">0枚</span>
+  </div>
 
-  <button id="riichiButton" class="riichi-button"
-   onclick="playerRiichi()" hidden>リーチ</button>
+  <div class="hand" id="hand"></div>
 
-  <button id="ronButton" class="win-button"
-   onclick="playerRon()" hidden>ロン</button>
+  <div class="actions">
+   <button id="northButton" class="north-button"
+    onclick="playerNorth()" hidden>北抜き</button>
 
-  <button id="tsumoButton" class="win-button"
-   onclick="playerTsumo()" hidden>ツモ</button>
+   <button id="riichiButton" class="riichi-button"
+    onclick="playerRiichi()" hidden>リーチ</button>
 
-  <button id="passRonButton" class="pass-button"
-   onclick="passRon()" hidden>見逃す</button>
+   <button id="ronButton" class="win-button"
+    onclick="playerRon()" hidden>ロン</button>
 
-  <button id="discard" onclick="playerDiscard()">打牌</button>
- </div>
+   <button id="tsumoButton" class="win-button"
+    onclick="playerTsumo()" hidden>ツモ</button>
 
- <div class="subactions">
-  <button onclick="newGame()">新しい局</button>
-  <button onclick="sortHand()">牌を整理</button>
+   <button id="passRonButton" class="pass-button"
+    onclick="passRon()" hidden>見逃す</button>
+
+   <button id="discard" onclick="playerDiscard()">打牌</button>
+  </div>
+
+  <div class="subactions">
+   <button onclick="newGame()">新しい局</button>
+   <button onclick="sortHand()">牌を整理</button>
+   <button class="menu-button" onclick="returnToMenu()">モード選択</button>
+  </div>
  </div>
 </div>
 
@@ -256,12 +307,9 @@ let riichi=[];
 let riichiPending=false;
 let riichiSticks=0;
 let pendingRon=null;
-
-/* ツモ牌そのものを保存する。並べ替えても位置を特定できる */
 let drawnTile=[];
-
-/* ロン見逃しによる一時フリテン */
 let temporaryFuriten=[];
+let riichiTile=[];
 
 function activeSeats(){return mode===4?4:3}
 
@@ -305,13 +353,25 @@ function sortTiles(a){
 
 function setMode(n){
  mode=n;
- document.getElementById("four").classList.toggle("active",n===4);
- document.getElementById("three").classList.toggle("active",n===3);
  points=Array(activeSeats()).fill(25000);
+ document.getElementById("startScreen").hidden=true;
+ document.getElementById("gameScreen").hidden=false;
  newGame();
 }
 
-function status(s){document.getElementById("status").textContent=s}
+function returnToMenu(){
+ gameToken++;
+ finished=true;
+ busy=false;
+ pendingRon=null;
+ document.getElementById("gameScreen").hidden=true;
+ document.getElementById("startScreen").hidden=false;
+}
+
+function status(s){
+ document.getElementById("status").textContent=s;
+}
+
 function log(s){
  const e=document.getElementById("log");
  if(!e)return;
@@ -331,6 +391,7 @@ function newGame(){
  riichi=Array(activeSeats()).fill(false);
  drawnTile=Array(activeSeats()).fill(null);
  temporaryFuriten=Array(activeSeats()).fill(false);
+ riichiTile=Array(activeSeats()).fill(null);
 
  selected=-1;
  current=0;
@@ -380,7 +441,6 @@ function drawnIndex(p){
  return hands[p].indexOf(drawnTile[p]);
 }
 
-/* 手牌のアガリ形を調べる */
 function getAgariPatterns(hand){
  if(hand.length!==14)return [];
  const counts={};
@@ -502,27 +562,21 @@ function isTenpai(hand,p){
  return calculateShanten(hand)===0;
 }
 
-/*
- シャンテン数計算。
- 面子・塔子・雀頭の組み合わせを探索し、
- 通常手と七対子のうち良い方を採用する。
-*/
 function calculateShanten(hand){
  const counts=Array(34).fill(0);
-
  hand.forEach(t=>{
   const i=tileIndex(t);
   if(i>=0)counts[i]++;
  });
 
  let best=8;
- const memo=new Map();
+ const memo=new Set();
 
  function dfs(melds,taatsu,pair){
-  while(melds>4)melds=4;
+  if(melds>4)melds=4;
   if(taatsu>4-melds)taatsu=4-melds;
 
-  let i=counts.findIndex(v=>v>0);
+  const i=counts.findIndex(v=>v>0);
   if(i===-1){
    const value=8-melds*2-taatsu-pair;
    if(value<best)best=value;
@@ -531,21 +585,18 @@ function calculateShanten(hand){
 
   const state=counts.join("")+"|"+melds+"|"+taatsu+"|"+pair;
   if(memo.has(state))return;
-  memo.set(state,true);
+  memo.add(state);
 
-  /* 1枚を孤立牌として使わない */
   counts[i]--;
   dfs(melds,taatsu,pair);
   counts[i]++;
 
-  /* 刻子 */
   if(counts[i]>=3&&melds<4){
    counts[i]-=3;
    dfs(melds+1,taatsu,pair);
    counts[i]+=3;
   }
 
-  /* 順子 */
   if(i<27&&i%9<=6&&counts[i+1]>0&&counts[i+2]>0&&melds<4){
    counts[i]--;
    counts[i+1]--;
@@ -556,7 +607,6 @@ function calculateShanten(hand){
    counts[i+2]++;
   }
 
-  /* 雀頭または対子塔子 */
   if(counts[i]>=2){
    counts[i]-=2;
    if(pair===0)dfs(melds,taatsu,1);
@@ -564,7 +614,6 @@ function calculateShanten(hand){
    counts[i]+=2;
   }
 
-  /* 両面・嵌張・辺張 */
   if(i<27&&i%9<=7&&counts[i+1]>0){
    counts[i]--;
    counts[i+1]--;
@@ -584,15 +633,14 @@ function calculateShanten(hand){
 
  dfs(0,0,0);
 
- /* 七対子シャンテン */
  let pairs=0;
  let unique=0;
  counts.forEach(c=>{
   if(c>0)unique++;
   if(c>=2)pairs++;
  });
- const chiitoi=6-pairs+Math.max(0,7-unique);
 
+ const chiitoi=6-pairs+Math.max(0,7-unique);
  return Math.min(best,chiitoi);
 }
 
@@ -615,8 +663,8 @@ function update(){
  if(!el)return;
  el.innerHTML="";
 
- /* ツモ牌以外を先に表示 */
  const drawn=drawnTile[0];
+
  hands[0].forEach((t,i)=>{
   if(t===drawn)return;
   const d=document.createElement("div");
@@ -631,7 +679,6 @@ function update(){
   el.appendChild(d);
  });
 
- /* ツモ牌は右端に独立して表示 */
  if(drawn&&hands[0].includes(drawn)){
   const i=hands[0].indexOf(drawn);
   const d=document.createElement("div");
@@ -658,6 +705,7 @@ function update(){
    rivers[p].forEach(t=>{
     const d=document.createElement("div");
     d.className="tile smalltile "+color(t);
+    if(t===riichiTile[p])d.classList.add("riichi-discard");
     d.textContent=label(t);
     river.appendChild(d);
    });
@@ -763,7 +811,9 @@ function playerDiscard(){
     hands[0].length!==14||selected<0)return;
  if(riichi[0]&&selected!==drawnIndex(0))return;
 
- if(riichiPending){
+ const declaringRiichi=riichiPending;
+
+ if(declaringRiichi){
   if(!canRiichiAfterDiscard(hands[0],selected,0))return;
   points[0]-=1000;
   riichiSticks++;
@@ -775,6 +825,9 @@ function playerDiscard(){
  const t=hands[0].splice(selected,1)[0];
  drawnTile[0]=null;
  rivers[0].push(t);
+
+ if(declaringRiichi)riichiTile[0]=t;
+
  selected=-1;
  busy=true;
  log("あなた："+label(t)+"を打牌");
@@ -784,7 +837,6 @@ function playerDiscard(){
  afterDiscard(0,t,gameToken);
 }
 
-/* CPUの打牌選択。シャンテン数を優先して牌を選ぶ */
 function chooseDiscard(h,p){
  if(riichi[p]){
   const index=drawnIndex(p);
@@ -797,13 +849,11 @@ function chooseDiscard(h,p){
  for(let i=0;i<h.length;i++){
   const test=h.slice();
   const t=test.splice(i,1)[0];
-
   const shanten=calculateShanten(test);
 
   const same=test.filter(q=>key(q)===key(t)).length;
   let keepValue=0;
 
-  /* 対子・近い数牌は残す */
   if(same>=1)keepValue+=8;
 
   if(t.s==="z"){
@@ -819,9 +869,7 @@ function chooseDiscard(h,p){
    if(t.n===1||t.n===9)keepValue-=1;
   }
 
-  /* シャンテン数を最優先、同じなら不要牌を捨てる */
   const score=shanten*100-keepValue+Math.random()*0.1;
-
   if(score<bestScore){
    bestScore=score;
    best=i;
@@ -834,8 +882,10 @@ function cpuNorth(p){
  if(mode!==3||riichi[p])return false;
  const index=hands[p].findIndex(isNorth);
  if(index<0)return false;
+
  const removed=hands[p].splice(index,1)[0];
  if(removed===drawnTile[p])drawnTile[p]=null;
+
  extracted[p].push({s:"z",n:"北"});
  log("CPU "+p+"：北を抜きました。");
  if(!drawFor(p))return false;
@@ -844,6 +894,7 @@ function cpuNorth(p){
 
 function cpuTurn(token){
  if(token!==gameToken||finished||pendingRon)return;
+
  try{
   const p=current;
   if(p>=activeSeats()){startPlayerTurn();return}
@@ -875,9 +926,9 @@ function cpuTurn(token){
   rivers[p].push(t);
   log("CPU "+p+"："+label(t)+"を打牌");
 
-  /* 13枚で聴牌していればリーチ */
   if(!riichi[p]&&points[p]>=1000&&isTenpai(hands[p],p)){
    riichi[p]=true;
+   riichiTile[p]=t;
    points[p]-=1000;
    riichiSticks++;
    log("CPU "+p+"：リーチ！");
@@ -892,14 +943,12 @@ function cpuTurn(token){
  }
 }
 
-/* 捨て牌に対するロン判定 */
 function afterDiscard(discarder,t,token){
  if(token!==gameToken||finished)return;
 
  for(let step=1;step<activeSeats();step++){
   const p=(discarder+step)%activeSeats();
 
-  /* 一時フリテン中はロンできない */
   if(p===0&&temporaryFuriten[0])continue;
 
   const result=canAgari(hands[p],t,p,false);
@@ -921,7 +970,6 @@ function afterDiscard(discarder,t,token){
  advanceTurn(discarder,token);
 }
 
-/* 次のプレイヤーへ進む */
 function advanceTurn(discarder,token){
  if(token!==gameToken||finished)return;
 
@@ -946,15 +994,11 @@ function playerRon(){
  winGame(0,"ロン",r);
 }
 
-/*
- ロンを見逃した場合：
- 一時フリテンにし、見逃した人より後のCPUにも
- ロンできる牌かどうかを確認してから手番を進める。
-*/
 function passRon(){
  if(!pendingRon||pendingRon.player!==0)return;
 
  const discarder=pendingRon.discarder;
+ const tile=pendingRon.tile;
  const token=pendingRon.token;
 
  pendingRon=null;
@@ -963,12 +1007,10 @@ function passRon(){
  log("あなた：ロンを見逃しました。一時フリテンです。");
  status("ロンを見逃しました。");
 
- /* 見逃したプレイヤーより後のCPUのロンを確認 */
- for(let step=1;step<activeSeats();step++){
-  const p=(0+step)%activeSeats();
-  if(p===discarder)break;
-
-  const result=canAgari(hands[p],rivers[discarder][rivers[discarder].length-1],p,false);
+ /* 自分より後の順番にいるCPUのロンも確認 */
+ for(let step=2;step<activeSeats();step++){
+  const p=(discarder+step)%activeSeats();
+  const result=canAgari(hands[p],tile,p,false);
   if(result){
    winGame(p,"ロン",result);
    return;
@@ -1008,17 +1050,53 @@ function winGame(winner,type,result){
  update();
 }
 
+/* プレイヤーのツモ */
 function startPlayerTurn(){
  if(finished)return;
  current=0;
- if(!drawFor(0)){endGame("山牌がなくなりました。流局です。");return}
+
+ if(!drawFor(0)){
+  endGame("山牌がなくなりました。流局です。");
+  return;
+ }
 
  sortTiles(hands[0]);
  selected=-1;
+
+ const tsumo=canAgari(hands[0],null,0,true);
+
+ /* リーチ後は和了できなければ自動ツモ切り */
+ if(riichi[0]&&!tsumo){
+  busy=true;
+  status("リーチ中：自動ツモ切りします。");
+  log("リーチ後の自動ツモ切りです。");
+  update();
+
+  const token=gameToken;
+  setTimeout(()=>{
+   if(token!==gameToken||finished)return;
+
+   const index=drawnIndex(0);
+   if(index<0){
+    endGame("ツモ牌が見つかりません。");
+    return;
+   }
+
+   const t=hands[0].splice(index,1)[0];
+   drawnTile[0]=null;
+   rivers[0].push(t);
+
+   log("あなた：リーチ後の自動ツモ切り "+label(t));
+   busy=true;
+   update();
+   afterDiscard(0,t,token);
+  },450);
+  return;
+ }
+
  busy=false;
  log("あなたが自動ツモしました。");
 
- const tsumo=canAgari(hands[0],null,0,true);
  if(tsumo){
   status("ツモできます！");
  }else{
@@ -1043,7 +1121,6 @@ function endGame(s){
  update();
 }
 
-newGame();
 </script>
 </body>
 </html>
