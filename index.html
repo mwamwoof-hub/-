@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="ja">
 <head>
@@ -63,21 +64,27 @@ button{cursor:pointer;font:inherit}
 }
 .top .backhand{transform:rotate(180deg)}
 
-/* 左右CPUの手牌を外側へ寄せる */
+/* 左右CPUの手牌：左右端の青枠位置 */
 .left .backhand{
+ position:absolute;
+ top:125px;
+ left:50%;
  width:max-content;
  justify-content:center;
  gap:2px;
- margin:8px 0;
- transform:translateX(-9px) rotate(90deg);
+ margin:0;
+ transform:translate(-50%,-50%) rotate(90deg);
  transform-origin:center center
 }
 .right .backhand{
+ position:absolute;
+ top:125px;
+ left:50%;
  width:max-content;
  justify-content:center;
  gap:2px;
- margin:8px 0;
- transform:translateX(9px) rotate(-90deg);
+ margin:0;
+ transform:translate(-50%,-50%) rotate(-90deg);
  transform-origin:center center
 }
 .left .north-area,.left .meld-area,
@@ -86,32 +93,65 @@ button{cursor:pointer;font:inherit}
  align-items:center
 }
 
-/* 捨て牌 */
+/* 捨て牌：中央を囲む配置 */
 .river{
- position:absolute;display:flex;flex-wrap:wrap;justify-content:center;
- align-content:flex-start;gap:2px;min-height:70px;z-index:2;
+ position:absolute;
+ display:flex;
+ flex-wrap:wrap;
+ justify-content:center;
+ align-content:flex-start;
+ gap:2px;
+ min-height:50px;
+ z-index:2;
  pointer-events:none
 }
 
-/* 上下の捨て牌 */
+/* 上側CPU：牌の上側を中央へ向ける */
 #river3{
- top:22%;left:50%;transform:translateX(-50%);
- width:58%;max-width:none
+ top:27%;
+ left:50%;
+ transform:translateX(-50%);
+ width:62%;
+ max-width:none
 }
+#river3 .tile{transform:rotate(180deg)}
+
+/* 自家：画面下側 */
 #river0{
- bottom:22%;left:50%;transform:translateX(-50%);
- width:58%;max-width:none
+ bottom:27%;
+ left:50%;
+ transform:translateX(-50%);
+ width:62%;
+ max-width:none
 }
 
-/* 左右の捨て牌：点数表示があった位置 */
+/* 左CPU：縦並び、牌の上側を右（中央）へ */
 #river1{
- top:34%;left:17%;transform:translateY(-50%);
- width:31%;max-width:none
+ top:50%;
+ left:25%;
+ transform:translate(-50%,-50%);
+ width:30%;
+ height:230px;
+ flex-direction:column;
+ flex-wrap:wrap;
+ align-content:flex-start;
+ justify-content:center
 }
+#river1 .tile{transform:rotate(90deg)}
+
+/* 右CPU：縦並び、牌の上側を左（中央）へ */
 #river2{
- top:34%;right:17%;transform:translateY(-50%);
- width:31%;max-width:none
+ top:50%;
+ right:25%;
+ transform:translate(50%,-50%);
+ width:30%;
+ height:230px;
+ flex-direction:column;
+ flex-wrap:wrap;
+ align-content:flex-end;
+ justify-content:center
 }
+#river2 .tile{transform:rotate(-90deg)}
 
 /* 牌のデザイン */
 .tile{
@@ -143,27 +183,29 @@ button{cursor:pointer;font:inherit}
 .smalltile .tile-symbols{width:90%;height:90%}
 .smalltile .circle-symbol{width:65%;border-width:1px}
 .selected{transform:translateY(-8px);border:2px solid #e9b94e}
-.riichi-discard{transform:rotate(90deg);margin:5px 3px}
+.riichi-discard{outline:2px solid #e9b94e}
 
-/* ドラ表示 */
+/* ドラ表示牌：小型化 */
 .dora-area{
  position:absolute;top:8px;left:8px;display:flex;align-items:center;
- gap:7px;z-index:5;white-space:nowrap
+ gap:5px;z-index:5;white-space:nowrap
 }
 .dora-label{font-size:12px;color:#f3dfa1;font-weight:bold}
 .dora-tile{
- width:34px;height:48px;background:linear-gradient(110deg,#fffef4,#f3edda);
+ width:24px;height:35px;background:linear-gradient(110deg,#fffef4,#f3edda);
  color:#2566b4;border:1px solid #b8ad91;border-bottom:2px solid #b8a98a;
- border-radius:4px;display:flex;align-items:center;justify-content:center;
- font-size:15px;font-weight:bold
+ border-radius:3px;display:flex;align-items:center;justify-content:center;
+ font-size:12px;font-weight:bold;overflow:hidden
 }
-.dora-tile .tile-number{font-size:13px}
-.dora-tile .tile-suit{font-size:15px}
-.dora-tile .tile-honor{font-size:19px}
+.dora-tile .tile-number{font-size:10px}
+.dora-tile .tile-suit{font-size:11px}
+.dora-tile .tile-honor{font-size:15px}
+.dora-tile .tile-symbols{width:90%;height:90%}
+.dora-tile .circle-symbol{border-width:1px}
 
 /* 本場・供託 */
 .round-counter{
- position:absolute;top:62px;left:8px;z-index:5;
+ position:absolute;top:52px;left:8px;z-index:5;
  display:flex;flex-direction:column;gap:4px;
  color:#f6e5ad;font-size:12px;font-weight:bold;
  white-space:nowrap;text-shadow:0 1px 3px #000;
@@ -174,11 +216,27 @@ button{cursor:pointer;font:inherit}
 .north-area,.meld-area{display:flex;justify-content:center;gap:3px;flex-wrap:wrap;min-height:20px;margin:3px 0}
 .north-tile{background:linear-gradient(110deg,#fffef4,#f3edda);color:#2566b4;border:1px solid #b8ad91;border-radius:3px;padding:3px 5px;font-weight:bold;font-size:12px}
 .meld-area{align-items:center}
-.meld-group{display:flex;gap:2px;padding:2px;border:1px solid #d5bd7b;border-radius:4px;background:#173b2e}
-.meld-tile{width:24px;height:34px;background:linear-gradient(110deg,#fffef4,#f3edda);color:#222;border:1px solid #b8ad91;border-bottom:2px solid #b8a98a;border-radius:3px;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:bold;overflow:hidden}
-.meld-tile .tile-number{font-size:10px}
-.meld-tile .tile-suit{font-size:13px}
-.meld-tile .tile-honor{font-size:16px}
+
+/* 鳴いた牌：全員小型化 */
+.meld-group{
+ display:flex;gap:1px;padding:1px;
+ border:1px solid #d5bd7b;border-radius:3px;
+ background:#173b2e
+}
+.meld-tile{
+ width:17px;height:25px;
+ background:linear-gradient(110deg,#fffef4,#f3edda);
+ color:#222;border:1px solid #b8ad91;border-bottom:1px solid #b8a98a;
+ border-radius:2px;display:flex;align-items:center;justify-content:center;
+ font-size:10px;font-weight:bold;overflow:hidden
+}
+.meld-tile .tile-face{width:100%;height:100%}
+.meld-tile .tile-number{font-size:7px}
+.meld-tile .tile-suit{font-size:8px}
+.meld-tile .tile-honor{font-size:11px}
+.meld-tile .tile-symbols{width:90%;height:90%}
+.meld-tile .circle-symbol{border-width:1px}
+.meld-tile .bamboo-symbol{border-radius:2px}
 #meld0{position:absolute;right:0;bottom:0;justify-content:flex-end;max-width:55%;z-index:3}
 
 /* 中央表示 */
@@ -220,18 +278,18 @@ button{cursor:pointer;font:inherit}
 }
 @media(max-width:380px){
  .left,.right{width:23%}
- .left .backhand{transform:translateX(-7px) rotate(90deg);gap:1px}
- .right .backhand{transform:translateX(7px) rotate(-90deg);gap:1px}
+ .left .backhand{top:125px;transform:translate(-50%,-50%) rotate(90deg);gap:1px}
+ .right .backhand{top:125px;transform:translate(-50%,-50%) rotate(-90deg);gap:1px}
  .back{width:12px;height:9px;flex-basis:12px}
  .center{width:32%}
  .actions button{padding:8px 9px}
  .hand .drawn-tile{margin-left:8px}
  .tile{width:clamp(23px,6.1vw,29px)}
  .round-counter{font-size:10px}
- #river1{width:30%;left:15%}
- #river2{width:30%;right:15%}
+ #river1{left:24%;width:29%;height:210px}
+ #river2{right:24%;width:29%;height:210px}
  .player-score{font-size:13px}
- .dora-tile{width:34px;height:48px}
+ .dora-tile{width:24px;height:35px}
 }
 </style>
 </head>
@@ -929,7 +987,7 @@ function update(){
  document.getElementById("honbaDisplay").textContent=honba+"本場";
  document.getElementById("riichiDisplay").textContent="供託 "+riichiSticks+"本";
 
- /* 捨て牌を各席に配置 */
+ /* 捨て牌を中央の周囲に配置 */
  document.getElementById("river3").hidden=mode!==4;
 
  for(let p=0;p<activeSeats();p++){
@@ -937,7 +995,7 @@ function update(){
   river.innerHTML="";
   rivers[p].forEach(t=>{
    let d=document.createElement("div");
-   d.className="tile smalltile";
+   d.className="tile river-tile river-tile-"+p;
    if(t===riichiTile[p])d.classList.add("riichi-discard");
    d.innerHTML=tileFaceHTML(t);
    river.appendChild(d)
