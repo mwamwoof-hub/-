@@ -283,6 +283,54 @@ button{cursor:pointer;font:inherit}
  .river .tile-suit{font-size:7px}
  .river .tile-honor{font-size:9px}
 }
+/* ===== CPUの向き・点数位置の修正 ===== */
+
+/* 左CPU：手牌と捨て牌を反対向きに */
+.left .backhand{
+  transform:translate(-50%,-50%) rotate(-90deg);
+}
+#river1 .tile{
+  transform:rotate(-90deg);
+}
+
+/* 右CPU：手牌と捨て牌を反対向きに */
+.right .backhand{
+  transform:translate(-50%,-50%) rotate(90deg);
+}
+#river2 .tile{
+  transform:rotate(90deg);
+}
+
+/* CPUの点数を表示し、中央側へ移動 */
+.left .player-score{
+  display:block;
+  top:50px;
+  left:calc(50% + 18px);
+  transform:translateX(-50%) rotate(90deg);
+  transform-origin:center center;
+  z-index:5;
+}
+
+.right .player-score{
+  display:block;
+  top:50px;
+  left:calc(50% - 18px);
+  transform:translateX(-50%) rotate(-90deg);
+  transform-origin:center center;
+  z-index:5;
+}
+
+/* 狭い画面でも点数位置を維持 */
+@media(max-width:380px){
+  .left .player-score{
+    left:calc(50% + 16px);
+    top:50px;
+  }
+  .right .player-score{
+    left:calc(50% - 16px);
+    top:50px;
+  }
+}
 </style>
 </head>
 <body>
