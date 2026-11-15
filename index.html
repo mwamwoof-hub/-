@@ -31,8 +31,8 @@ button{cursor:pointer;font:inherit}
 .player{position:absolute;display:flex;flex-direction:column;align-items:center;gap:3px;font-size:12px;z-index:3}
 .name{color:#f5e3a8;font-weight:bold;white-space:nowrap}
 .top{top:8px;left:50%;transform:translateX(-50%)}
-.left{left:0;top:35%;width:22%;align-items:center}
-.right{right:0;top:35%;width:22%;align-items:center}
+.left{left:-1%;top:34%;width:22%;align-items:center}
+.right{right:-1%;top:34%;width:22%;align-items:center}
 .bottom{bottom:7px;left:50%;transform:translateX(-50%);width:95%}
 
 /* 名前の向き */
@@ -63,22 +63,22 @@ button{cursor:pointer;font:inherit}
 }
 .top .backhand{transform:rotate(180deg)}
 
-/* 左右のCPU手牌：中央基準で回転し、画面内側に配置 */
+/* 左右CPUの手牌を外側へ寄せる */
 .left .backhand{
  width:max-content;
  justify-content:center;
  gap:2px;
  margin:8px 0;
- transform:rotate(90deg);
- transform-origin:center center;
+ transform:translateX(-9px) rotate(90deg);
+ transform-origin:center center
 }
 .right .backhand{
  width:max-content;
  justify-content:center;
  gap:2px;
  margin:8px 0;
- transform:rotate(-90deg);
- transform-origin:center center;
+ transform:translateX(9px) rotate(-90deg);
+ transform-origin:center center
 }
 .left .north-area,.left .meld-area,
 .right .north-area,.right .meld-area{
@@ -92,10 +92,26 @@ button{cursor:pointer;font:inherit}
  align-content:flex-start;gap:2px;min-height:70px;z-index:2;
  pointer-events:none
 }
-#river3{top:22%;left:50%;transform:translateX(-50%);width:58%;max-width:none}
-#river1{top:50%;left:2%;transform:translateY(-50%);width:31%;max-width:none}
-#river2{top:50%;right:2%;transform:translateY(-50%);width:31%;max-width:none}
-#river0{bottom:22%;left:50%;transform:translateX(-50%);width:58%;max-width:none}
+
+/* 上下の捨て牌 */
+#river3{
+ top:22%;left:50%;transform:translateX(-50%);
+ width:58%;max-width:none
+}
+#river0{
+ bottom:22%;left:50%;transform:translateX(-50%);
+ width:58%;max-width:none
+}
+
+/* 左右の捨て牌：点数表示があった位置 */
+#river1{
+ top:34%;left:17%;transform:translateY(-50%);
+ width:31%;max-width:none
+}
+#river2{
+ top:34%;right:17%;transform:translateY(-50%);
+ width:31%;max-width:none
+}
 
 /* 牌のデザイン */
 .tile{
@@ -136,18 +152,18 @@ button{cursor:pointer;font:inherit}
 }
 .dora-label{font-size:12px;color:#f3dfa1;font-weight:bold}
 .dora-tile{
- width:30px;height:42px;background:linear-gradient(110deg,#fffef4,#f3edda);
+ width:34px;height:48px;background:linear-gradient(110deg,#fffef4,#f3edda);
  color:#2566b4;border:1px solid #b8ad91;border-bottom:2px solid #b8a98a;
  border-radius:4px;display:flex;align-items:center;justify-content:center;
  font-size:15px;font-weight:bold
 }
-.dora-tile .tile-number{font-size:12px}
-.dora-tile .tile-suit{font-size:14px}
-.dora-tile .tile-honor{font-size:18px}
+.dora-tile .tile-number{font-size:13px}
+.dora-tile .tile-suit{font-size:15px}
+.dora-tile .tile-honor{font-size:19px}
 
 /* 本場・供託 */
 .round-counter{
- position:absolute;top:56px;left:8px;z-index:5;
+ position:absolute;top:62px;left:8px;z-index:5;
  display:flex;flex-direction:column;gap:4px;
  color:#f6e5ad;font-size:12px;font-weight:bold;
  white-space:nowrap;text-shadow:0 1px 3px #000;
@@ -204,17 +220,18 @@ button{cursor:pointer;font:inherit}
 }
 @media(max-width:380px){
  .left,.right{width:23%}
- .left .backhand,.right .backhand{gap:1px}
+ .left .backhand{transform:translateX(-7px) rotate(90deg);gap:1px}
+ .right .backhand{transform:translateX(7px) rotate(-90deg);gap:1px}
  .back{width:12px;height:9px;flex-basis:12px}
  .center{width:32%}
  .actions button{padding:8px 9px}
  .hand .drawn-tile{margin-left:8px}
  .tile{width:clamp(23px,6.1vw,29px)}
  .round-counter{font-size:10px}
- #river1{width:30%;left:1%}
- #river2{width:30%;right:1%}
+ #river1{width:30%;left:15%}
+ #river2{width:30%;right:15%}
  .player-score{font-size:13px}
- .dora-tile{width:30px;height:42px}
+ .dora-tile{width:34px;height:48px}
 }
 </style>
 </head>
@@ -651,7 +668,7 @@ function calculateFu(pattern,groups,p,isTsumo,winningTile,yaku){
   let ya=isYaochu(g.tile),v=g.kan?(ya?32:16):(ya?8:4);
   let ronCompleted=!isTsumo&&winningTile&&key(g.tile)===key(winningTile)&&!g.open&&!g.kan;
   if(g.open||ronCompleted)v/=2;
-  fu+=v;
+  fu+=v
  });
  if(!isTsumo&&fu===20)return 30;
  return Math.ceil(fu/10)*10;
@@ -849,6 +866,7 @@ function newGame(){
  hands.forEach(sortTiles);
 
  document.getElementById("player3").style.display=mode===4?"flex":"none";
+ document.getElementById("river3").hidden=mode!==4;
  document.getElementById("doraIndicator").innerHTML=tileFaceHTML(doraIndicator);
 
  status("");
@@ -911,6 +929,9 @@ function update(){
  document.getElementById("honbaDisplay").textContent=honba+"本場";
  document.getElementById("riichiDisplay").textContent="供託 "+riichiSticks+"本";
 
+ /* 捨て牌を各席に配置 */
+ document.getElementById("river3").hidden=mode!==4;
+
  for(let p=0;p<activeSeats();p++){
   let river=document.getElementById("river"+p);
   river.innerHTML="";
@@ -923,6 +944,7 @@ function update(){
   })
  }
 
+ /* CPUの手牌・北抜き表示 */
  for(let p=1;p<4;p++){
   let b=document.getElementById("back"+p),n=document.getElementById("north"+p);
   if(b){
@@ -955,6 +977,7 @@ function update(){
 
  renderMelds();
 
+ /* 点数表示 */
  for(let p=0;p<4;p++){
   let e=document.getElementById("playerScore"+p);
   if(e){
@@ -997,6 +1020,7 @@ function update(){
   document.getElementById("chiButton").hidden=!callPending.options.includes("chi")
  }
 }
+
 function selectTile(i){
  if(current!==0||busy||finished||pendingRon||callPending||hands[0].length!==14-melds[0].length*3)return;
  if(riichi[0]&&i!==drawnIndex(0))return;
@@ -1357,6 +1381,7 @@ function playerTsumo(){
 }
 
 function playerName(p){return p===0?"あなた":"CPU "+p}
+
 function showResult(winner,type,result,score){
  document.getElementById("resultTitle").textContent=playerName(winner)+"の"+type+"！";
  let names=result.yaku.map(y=>y.name+" "+y.han+"翻").join("・");
