@@ -18,167 +18,75 @@ button{cursor:pointer;font:inherit}
 .status{text-align:center;padding:9px;color:#f1d98c;font-weight:bold;min-height:36px}
 
 .table{
- position:relative;
- width:96%;
- max-width:480px;
- height:min(610px,calc(100dvh - 340px));
- min-height:440px;
+ position:relative;width:96%;max-width:480px;
+ height:min(610px,calc(100dvh - 340px));min-height:440px;
  margin:5px auto;
  background:radial-gradient(ellipse,#087b50,#005638 75%,#06432f);
- border:10px solid #704b2e;
- border-radius:30px;
+ border:10px solid #704b2e;border-radius:30px;
  box-shadow:0 5px 18px #0008,inset 0 0 18px #0003;
  overflow:hidden
 }
 
-.player{position:absolute;display:flex;flex-direction:column;align-items:center;gap:3px;font-size:12px}
+/* プレイヤー情報 */
+.player{position:absolute;display:flex;flex-direction:column;align-items:center;gap:3px;font-size:12px;z-index:3}
 .name{color:#f5e3a8;font-weight:bold;white-space:nowrap}
-
-/* プレイヤー位置 */
-.top{top:35px;left:50%;transform:translateX(-50%)}
-.left{left:0;top:37%;width:18%;align-items:flex-start}
-.right{right:0;top:37%;width:18%;align-items:flex-end}
+.top{top:8px;left:50%;transform:translateX(-50%)}
+.left{left:2px;top:35%;width:17%;align-items:flex-start}
+.right{right:2px;top:35%;width:17%;align-items:flex-end}
 .bottom{bottom:7px;left:50%;transform:translateX(-50%);width:95%}
 
-/* 名前と点数の向き */
+/* 名前の向き */
 .top .name{transform:rotate(180deg)}
 .left .name{transform:rotate(90deg);transform-origin:left center;margin-left:5px}
 .right .name{transform:rotate(-90deg);transform-origin:right center;margin-right:5px}
 
-/* 全員共通の点数表示：枠なし */
+/* 点数表示：全員同じ大きさ・書式 */
 .player-score{
- color:#fff2c1;
- font-size:13px;
- font-weight:bold;
- line-height:1.2;
- white-space:nowrap;
- text-shadow:0 1px 3px #000;
+ color:#fff2c1;font-size:13px;font-weight:bold;
+ line-height:1.2;white-space:nowrap;text-shadow:0 1px 3px #000;
+ padding:2px 5px
 }
-
-/* CPUの点数を中央向きにする */
 .top .player-score{transform:rotate(180deg)}
-.left .player-score{
- transform:rotate(90deg);
- transform-origin:left center;
- margin-left:5px;
-}
-.right .player-score{
- transform:rotate(-90deg);
- transform-origin:right center;
- margin-right:5px;
-}
-.bottom .player-score{
- text-align:center;
- font-size:14px;
-}
+.left .player-score{transform:rotate(90deg);transform-origin:left center;margin-left:5px}
+.right .player-score{transform:rotate(-90deg);transform-origin:right center;margin-right:5px}
+.bottom .player-score{font-size:13px;text-align:center}
 
-/* 手牌の裏 */
+/* CPUの手牌 */
 .backhand{display:flex;justify-content:center;gap:3px;align-items:center;min-height:19px;flex-wrap:nowrap}
 .back{width:14px;height:10px;border:1px solid #e2c77e;background:linear-gradient(135deg,#dba94b,#a66c24);border-radius:3px;flex:0 0 14px;box-shadow:0 1px 2px #0008}
 .top .backhand{transform:rotate(180deg)}
-
 .left .backhand{
- transform:rotate(90deg);
- transform-origin:left center;
- margin:8px 0 8px 2px;
+ transform:rotate(90deg);transform-origin:left center;
+ margin:8px 0 8px 0;justify-content:flex-start;
+ transform:translateX(-5px) rotate(90deg);transform-origin:left center
 }
 .right .backhand{
- transform:rotate(-90deg);
- transform-origin:right center;
- margin:8px 2px 8px 0;
+ transform:translateX(5px) rotate(-90deg);transform-origin:right center;
+ margin:8px 0;justify-content:flex-end
 }
-.left .backhand{justify-content:flex-start}
-.right .backhand{justify-content:flex-end}
+.left .north-area,.left .meld-area{justify-content:flex-start}
+.right .north-area,.right .meld-area{justify-content:flex-end}
 
-/* 捨て牌 */
+/* 捨て牌：プレイヤー情報とは独立して配置 */
 .river{
- display:flex;
- flex-wrap:wrap;
- justify-content:center;
- align-content:flex-start;
- gap:2px;
- width:100%;
- max-width:140px;
- min-height:20px
+ position:absolute;display:flex;flex-wrap:wrap;justify-content:center;
+ align-content:flex-start;gap:2px;min-height:70px;z-index:2;
+ pointer-events:none
 }
-
-/* 上の捨て牌 */
-#river3{
- position:absolute;
- top:22%;
- left:50%;
- transform:translateX(-50%);
- width:58%;
- max-width:none;
- min-height:75px;
- z-index:2;
-}
-
-/* 左の捨て牌 */
-#river1{
- position:absolute;
- top:50%;
- left:2%;
- transform:translateY(-50%);
- width:34%;
- max-width:none;
- min-height:75px;
- z-index:2;
-}
-
-/* 右の捨て牌 */
-#river2{
- position:absolute;
- top:50%;
- right:2%;
- width:34%;
- max-width:none;
- min-height:75px;
- transform:translateY(-50%);
- z-index:2;
-}
-
-/* 自分の捨て牌 */
-#river0{
- position:absolute;
- bottom:22%;
- left:50%;
- transform:translateX(-50%);
- width:58%;
- max-width:none;
- min-height:75px;
- z-index:2;
-}
+#river3{top:22%;left:50%;transform:translateX(-50%);width:58%;max-width:none}
+#river1{top:50%;left:2%;transform:translateY(-50%);width:31%;max-width:none}
+#river2{top:50%;right:2%;transform:translateY(-50%);width:31%;max-width:none}
+#river0{bottom:22%;left:50%;transform:translateX(-50%);width:58%;max-width:none}
 
 /* 牌のデザイン */
 .tile{
- flex:0 0 auto;
- width:clamp(25px,6.5vw,34px);
- height:clamp(42px,11vw,53px);
- background:linear-gradient(110deg,#fffefb,#f5f0e5);
- color:#222;
- border:1px solid #c5c5c5;
- border-bottom:3px solid #b8b8b8;
- border-radius:4px;
- display:flex;
- align-items:center;
- justify-content:center;
- font-weight:bold;
- box-shadow:0 2px 3px #0007;
- position:relative;
- overflow:hidden
+ flex:0 0 auto;width:clamp(25px,6.5vw,34px);height:clamp(42px,11vw,53px);
+ background:linear-gradient(110deg,#fffefb,#f5f0e5);color:#222;
+ border:1px solid #c5c5c5;border-bottom:3px solid #b8b8b8;
+ border-radius:4px;display:flex;align-items:center;justify-content:center;
+ font-weight:bold;box-shadow:0 2px 3px #0007;position:relative;overflow:hidden
 }
-.tile::before{
- content:"";
- position:absolute;
- top:0;
- left:0;
- right:0;
- height:4px;
- background:linear-gradient(90deg,#b87918,#f2cf65,#b87918);
- z-index:2
-}
-
+.tile::before{content:"";position:absolute;top:0;left:0;right:0;height:4px;background:linear-gradient(90deg,#b87918,#f2cf65,#b87918);z-index:2}
 .tile-face{width:100%;height:100%;display:flex;flex-direction:column;justify-content:center;align-items:center;line-height:1}
 .tile-number{font-size:clamp(12px,3.2vw,17px);font-weight:900}
 .tile-suit{font-size:clamp(13px,3.6vw,19px);font-weight:900}
@@ -186,7 +94,6 @@ button{cursor:pointer;font:inherit}
 .tile-honor.white{color:#1764b0}
 .tile-honor.green{color:#14834a}
 .tile-honor.red{color:#c52b27}
-
 .tile-symbols{display:grid;grid-template-columns:repeat(3,1fr);grid-template-rows:repeat(3,1fr);width:85%;height:85%;place-items:center}
 .circle-symbol{width:65%;aspect-ratio:1;border-radius:50%;border:1.5px solid #225ca5;background:radial-gradient(circle at 35% 30%,#fff 0 15%,#4278bb 35%,#173f83 75%)}
 .circle-symbol.red-center{background:radial-gradient(circle at 35% 30%,#fff 0 15%,#d64a42 35%,#9d1717 75%);border-color:#a61f1f}
@@ -194,7 +101,6 @@ button{cursor:pointer;font:inherit}
 .bamboo-symbol:before,.bamboo-symbol:after{content:"";position:absolute;left:0;right:0;height:2px;background:#d6e8c8}
 .bamboo-symbol:before{top:30%}
 .bamboo-symbol:after{top:65%}
-
 .smalltile{width:17px;height:25px;font-size:10px;border-radius:3px}
 .smalltile .tile-number{font-size:8px}
 .smalltile .tile-suit{font-size:10px}
@@ -204,34 +110,33 @@ button{cursor:pointer;font:inherit}
 .selected{transform:translateY(-8px);border:2px solid #e9b94e}
 .riichi-discard{transform:rotate(90deg);margin:5px 3px}
 
-/* ドラ表示 */
-.dora-area{position:absolute;top:8px;left:8px;display:flex;align-items:center;gap:6px;z-index:4;white-space:nowrap}
-.dora-label{font-size:11px;color:#f3dfa1;font-weight:bold}
-.dora-tile{width:32px;height:46px;background:linear-gradient(110deg,#fffef4,#f3edda);color:#2566b4;border:1px solid #b8ad91;border-bottom:3px solid #b8a98a;border-radius:5px;display:flex;align-items:center;justify-content:center;font-size:17px;font-weight:bold}
-.dora-tile .tile-number{font-size:13px}
-.dora-tile .tile-suit{font-size:17px}
-.dora-tile .tile-honor{font-size:21px}
+/* ドラ表示：見やすく拡大 */
+.dora-area{
+ position:absolute;top:8px;left:8px;display:flex;align-items:center;
+ gap:7px;z-index:5;white-space:nowrap
+}
+.dora-label{font-size:12px;color:#f3dfa1;font-weight:bold}
+.dora-tile{
+ width:40px;height:56px;background:linear-gradient(110deg,#fffef4,#f3edda);
+ color:#2566b4;border:1px solid #b8ad91;border-bottom:3px solid #b8a98a;
+ border-radius:5px;display:flex;align-items:center;justify-content:center;
+ font-size:19px;font-weight:bold
+}
+.dora-tile .tile-number{font-size:16px}
+.dora-tile .tile-suit{font-size:19px}
+.dora-tile .tile-honor{font-size:24px}
 
-/* 本場・供託表示 */
+/* 本場・供託：ドラ表示の真下 */
 .round-counter{
- position:absolute;
- top:12px;
- left:150px;
- z-index:4;
- display:flex;
- flex-direction:column;
- gap:4px;
- color:#f6e5ad;
- font-size:12px;
- font-weight:bold;
- white-space:nowrap;
- text-shadow:0 1px 3px #000
+ position:absolute;top:70px;left:8px;z-index:5;
+ display:flex;flex-direction:column;gap:4px;
+ color:#f6e5ad;font-size:12px;font-weight:bold;
+ white-space:nowrap;text-shadow:0 1px 3px #000;
+ background:#123c30b8;padding:4px 6px;border-radius:5px
 }
 .round-counter span{display:block}
 
 .north-area,.meld-area{display:flex;justify-content:center;gap:3px;flex-wrap:wrap;min-height:20px;margin:3px 0}
-.left .north-area,.left .meld-area{justify-content:flex-start}
-.right .north-area,.right .meld-area{justify-content:flex-end}
 .north-tile{background:linear-gradient(110deg,#fffef4,#f3edda);color:#2566b4;border:1px solid #b8ad91;border-radius:3px;padding:3px 5px;font-weight:bold;font-size:12px}
 .meld-area{align-items:center}
 .meld-group{display:flex;gap:2px;padding:2px;border:1px solid #d5bd7b;border-radius:4px;background:#173b2e}
@@ -242,16 +147,7 @@ button{cursor:pointer;font:inherit}
 #meld0{position:absolute;right:0;bottom:0;justify-content:flex-end;max-width:55%;z-index:3}
 
 /* 中央表示 */
-.center{
- position:absolute;
- top:51%;
- left:50%;
- transform:translate(-50%,-50%);
- text-align:center;
- width:38%;
- pointer-events:none;
- z-index:1
-}
+.center{position:absolute;top:51%;left:50%;transform:translate(-50%,-50%);text-align:center;width:34%;pointer-events:none;z-index:1}
 .round{color:#f6e5ad;font-size:19px;font-weight:bold}
 .centerinfo{font-size:13px;margin-top:7px}
 
@@ -288,15 +184,16 @@ button{cursor:pointer;font:inherit}
  .table{height:440px;min-height:400px}
 }
 @media(max-width:380px){
- .left,.right{width:17%}
- .center{width:34%}
+ .left,.right{width:16%}
+ .center{width:32%}
  .actions button{padding:8px 9px}
  .hand .drawn-tile{margin-left:8px}
  .tile{width:clamp(23px,6.1vw,29px)}
- .round-counter{left:135px;font-size:10px}
- #river1{width:35%;left:1%}
- #river2{width:35%;right:1%}
- .player-score{font-size:11px}
+ .round-counter{font-size:10px}
+ #river1{width:30%;left:1%}
+ #river2{width:30%;right:1%}
+ .player-score{font-size:13px}
+ .dora-tile{width:38px;height:53px}
 }
 </style>
 </head>
@@ -356,7 +253,6 @@ button{cursor:pointer;font:inherit}
    <div class="backhand" id="back3"></div>
    <div class="north-area" id="north3"></div>
    <div class="meld-area" id="meld3"></div>
-   <div class="river" id="river3"></div>
   </div>
 
   <!-- 左：CPU1 -->
@@ -366,7 +262,6 @@ button{cursor:pointer;font:inherit}
    <div class="backhand" id="back1"></div>
    <div class="north-area" id="north1"></div>
    <div class="meld-area" id="meld1"></div>
-   <div class="river" id="river1"></div>
   </div>
 
   <!-- 右：CPU2 -->
@@ -376,17 +271,21 @@ button{cursor:pointer;font:inherit}
    <div class="backhand" id="back2"></div>
    <div class="north-area" id="north2"></div>
    <div class="meld-area" id="meld2"></div>
-   <div class="river" id="river2"></div>
   </div>
 
   <!-- 下：あなた -->
   <div class="player bottom">
-   <div class="river" id="river0"></div>
    <div class="north-area" id="north0"></div>
    <div class="meld-area" id="meld0"></div>
    <div class="name">あなた（東）</div>
    <div class="player-score" id="playerScore0">25000点</div>
   </div>
+
+  <!-- 捨て牌は4人ともテーブル直下に配置 -->
+  <div class="river" id="river3"></div>
+  <div class="river" id="river1"></div>
+  <div class="river" id="river2"></div>
+  <div class="river" id="river0"></div>
 
   <div class="center">
    <div class="round" id="round">東一局</div>
@@ -400,16 +299,13 @@ button{cursor:pointer;font:inherit}
    <span>あなたの手牌</span>
    <span id="count">0枚</span>
   </div>
-
   <div class="hand" id="hand"></div>
-
   <div class="call-actions" id="callActions" hidden>
    <button id="ponButton" onclick="playerCall('pon')">ポン</button>
    <button id="kanButton" onclick="playerCall('kan')">大明槓</button>
    <button id="chiButton" onclick="playerCall('chi')">チー</button>
    <button class="skip-call" onclick="skipCall()">スキップ</button>
   </div>
-
   <div class="actions">
    <button id="northButton" class="north-button" onclick="playerNorth()" hidden>北抜き</button>
    <button id="ankanButton" onclick="playerAnkan()" hidden>暗槓</button>
@@ -424,7 +320,6 @@ button{cursor:pointer;font:inherit}
 
 <script>
 "use strict";
-
 const honors=["東","南","西","北","白","發","中"];
 const dragons=["白","發","中"],winds=["東","南","西","北"];
 
@@ -721,6 +616,7 @@ function evaluatePattern(hand,pattern,p,isTsumo,winningTile){
  let han=yaku.reduce((s,y)=>s+y.han,0);
  return{yaku,han,fu:calculateFu(pattern,groups,p,isTsumo,winningTile,yaku),yakuman:false};
 }
+
 function calculateFu(pattern,groups,p,isTsumo,winningTile,yaku){
  if(pattern.sevenPairs)return 25;
  if(yaku.some(y=>y.name==="平和"))return isTsumo?20:30;
@@ -803,7 +699,7 @@ function calculateShanten(hand,openCount=0){
   if(c[i]>=3&&m<need){
    c[i]-=3;dfs(m+1,t,p);c[i]+=3
   }
-  if(i<27&&i%9<=6&&c[i+1]&&c[i+2]&&m<need){
+  if(i<27&&i%9<=6&&c[i+1]&&c[i+2]){
    c[i]--;c[i+1]--;c[i+2]--;
    dfs(m+1,t,p);
    c[i]++;c[i+1]++;c[i+2]++
@@ -835,7 +731,6 @@ function canRiichiAfterDiscard(h,i,p){
  a.splice(i,1);
  return isTenpai(a,p);
 }
-
 function setMode(n){
  mode=n;
  document.getElementById("playerModeOptions").hidden=true;
@@ -996,7 +891,7 @@ function update(){
  document.getElementById("honbaDisplay").textContent=honba+"本場";
  document.getElementById("riichiDisplay").textContent="供託 "+riichiSticks+"本";
 
- /* 捨て牌 */
+ /* 4人の捨て牌 */
  for(let p=0;p<activeSeats();p++){
   let river=document.getElementById("river"+p);
   river.innerHTML="";
@@ -1042,7 +937,7 @@ function update(){
 
  renderMelds();
 
- /* 4人全員の点数を同じ形式で更新 */
+ /* 全員の点数を統一した書式で表示 */
  for(let p=0;p<4;p++){
   let e=document.getElementById("playerScore"+p);
   if(e){
