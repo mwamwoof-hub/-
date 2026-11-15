@@ -19,24 +19,28 @@ button{cursor:pointer;font:inherit}
 .table{position:relative;width:96%;max-width:480px;height:min(610px,calc(100dvh - 340px));min-height:440px;margin:5px auto;background:radial-gradient(ellipse,#087b50,#005638 75%,#06432f);border:10px solid #704b2e;border-radius:30px;box-shadow:0 5px 18px #0008,inset 0 0 18px #0003;overflow:hidden}
 .player{position:absolute;display:flex;flex-direction:column;align-items:center;gap:3px;font-size:12px;z-index:3}
 .name{color:#f5e3a8;font-weight:bold;white-space:nowrap}
+.north-count{font-size:9px;color:#f5d77d;font-weight:normal;margin-left:2px;white-space:nowrap}
 .top{top:8px;left:50%;transform:translateX(-50%)}
-.left{left:-1%;top:34%;width:22%;align-items:center}
-.right{right:-1%;top:34%;width:22%;align-items:center}
+.left{left:-1%;top:34%;width:22%;height:235px;display:block}
+.right{right:-1%;top:34%;width:22%;height:235px;display:block}
 .bottom{bottom:7px;left:50%;transform:translateX(-50%);width:95%}
 .top .name{transform:rotate(180deg)}
-.left .name{transform:rotate(90deg);transform-origin:center center}
-.right .name{transform:rotate(-90deg);transform-origin:center center}
+.left .name,.right .name{position:absolute;top:0;left:50%;width:max-content;text-align:center}
+.left .name{transform:translateX(-50%) rotate(90deg);transform-origin:center center}
+.right .name{transform:translateX(-50%) rotate(-90deg);transform-origin:center center}
 .player-score{color:#fff2c1;font-size:13px;font-weight:bold;line-height:1.2;white-space:nowrap;text-shadow:0 1px 3px #000;padding:2px 5px}
 .top .player-score{transform:rotate(180deg)}
-.left .player-score{transform:rotate(90deg);transform-origin:center center}
-.right .player-score{transform:rotate(-90deg);transform-origin:center center}
+.left .player-score,.right .player-score{position:absolute;top:45px;left:50%;width:max-content;text-align:center}
+.left .player-score{transform:translateX(-50%) rotate(90deg);transform-origin:center center}
+.right .player-score{transform:translateX(-50%) rotate(-90deg);transform-origin:center center}
 .bottom .player-score{font-size:13px;text-align:center}
 .backhand{display:flex;justify-content:center;gap:3px;align-items:center;min-height:19px;flex-wrap:nowrap}
 .back{width:14px;height:10px;border:1px solid #e2c77e;background:linear-gradient(135deg,#dba94b,#a66c24);border-radius:3px;flex:0 0 14px;box-shadow:0 1px 2px #0008}
 .top .backhand{transform:rotate(180deg)}
 .left .backhand,.right .backhand{position:absolute;top:125px;left:50%;width:max-content;justify-content:center;gap:2px;margin:0;transform:translate(-50%,-50%) rotate(90deg);transform-origin:center center}
 .right .backhand{transform:translate(-50%,-50%) rotate(-90deg)}
-.left .north-area,.left .meld-area,.right .north-area,.right .meld-area{justify-content:center;align-items:center}
+.left .meld-area,.right .meld-area{position:absolute;top:205px;left:50%;width:100%;transform:translateX(-50%);justify-content:center;align-items:center}
+.north-area{display:none!important}
 .river{position:absolute;display:flex;flex-wrap:wrap;justify-content:center;align-content:flex-start;gap:2px;min-height:50px;z-index:2;pointer-events:none}
 #river3{top:27%;left:50%;transform:translateX(-50%);width:62%;max-width:none}
 #river3 .tile{transform:rotate(180deg)}
@@ -69,6 +73,14 @@ button{cursor:pointer;font:inherit}
 .smalltile .circle-symbol{width:65%;border-width:1px}
 .selected{transform:translateY(-8px);border:2px solid #e9b94e}
 .riichi-discard{outline:2px solid #e9b94e}
+.river .tile{width:clamp(18px,4.8vw,25px);height:clamp(30px,8vw,39px);border-radius:3px;border-bottom-width:2px}
+.river .tile::before{height:2px}
+.river .tile-number{font-size:clamp(9px,2.4vw,12px)}
+.river .tile-suit{font-size:clamp(10px,2.7vw,13px)}
+.river .tile-honor{font-size:clamp(13px,3.4vw,17px)}
+.river .tile-symbols{width:88%;height:88%}
+.river .circle-symbol{border-width:1px}
+.river .bamboo-symbol{border-radius:2px}
 .dora-area{position:absolute;top:8px;left:8px;display:flex;align-items:center;gap:4px;z-index:5;white-space:nowrap}
 .dora-label{font-size:11px;color:#f3dfa1;font-weight:bold}
 .dora-tile{width:18px;height:27px;background:linear-gradient(110deg,#fffef4,#f3edda);color:#2566b4;border:1px solid #b8ad91;border-bottom:2px solid #b8a98a;border-radius:3px;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:bold;overflow:hidden}
@@ -79,9 +91,7 @@ button{cursor:pointer;font:inherit}
 .dora-tile .circle-symbol{border-width:1px}
 .round-counter{position:absolute;top:48px;left:8px;z-index:5;display:flex;flex-direction:column;gap:4px;color:#f6e5ad;font-size:12px;font-weight:bold;white-space:nowrap;text-shadow:0 1px 3px #000;background:#123c30b8;padding:4px 6px;border-radius:5px}
 .round-counter span{display:block}
-.north-area,.meld-area{display:flex;justify-content:center;gap:3px;flex-wrap:wrap;min-height:20px;margin:3px 0}
-.north-tile{background:linear-gradient(110deg,#fffef4,#f3edda);color:#2566b4;border:1px solid #b8ad91;border-radius:3px;padding:3px 5px;font-weight:bold;font-size:12px}
-.meld-area{align-items:center}
+.meld-area{display:flex;justify-content:center;gap:3px;flex-wrap:wrap;min-height:20px;margin:3px 0;align-items:center}
 .meld-group{display:flex;gap:1px;padding:1px;border:1px solid #d5bd7b;border-radius:3px;background:#173b2e}
 .meld-tile{width:14px;height:21px;background:linear-gradient(110deg,#fffef4,#f3edda);color:#222;border:1px solid #b8ad91;border-bottom:1px solid #b8a98a;border-radius:2px;display:flex;align-items:center;justify-content:center;font-size:8px;font-weight:bold;overflow:hidden}
 .meld-tile .tile-face{width:100%;height:100%}
@@ -586,6 +596,12 @@ function renderMelds(){
   });
  }
 }
+function setPlayerName(p,text){
+ let e=document.querySelector(p===0?".bottom .name":p===1?".left .name":p===2?".right .name":"#player3 .name");
+ if(!e)return;
+ let count=extracted[p]?.length||0;
+ e.innerHTML=text+(count?'<span class="north-count">（北抜き '+count+'）</span>':"");
+}
 function update(){
  let el=document.getElementById("hand");
  if(!el||!hands[0])return;
@@ -614,30 +630,20 @@ function update(){
   })
  }
  for(let p=1;p<4;p++){
-  let b=document.getElementById("back"+p),n=document.getElementById("north"+p);
+  let b=document.getElementById("back"+p);
   if(b){b.innerHTML="";if(p<activeSeats())hands[p].forEach(()=>{
    let x=document.createElement("div");x.className="back";b.appendChild(x)
   })}
-  if(n){
-   n.innerHTML="";
-   if(p<activeSeats())extracted[p].forEach(t=>{
-    let x=document.createElement("div");x.className="north-tile";x.innerHTML=tileFaceHTML(t);n.appendChild(x)
-   })
-  }
  }
- let n0=document.getElementById("north0");n0.innerHTML="";
- extracted[0].forEach(t=>{
-  let d=document.createElement("div");d.className="north-tile";d.innerHTML=tileFaceHTML(t);n0.appendChild(d)
- });
+ setPlayerName(0,"あなた（"+seatWind(0)+"）");
+ setPlayerName(1,"CPU 1（"+seatWind(1%activeSeats())+"）");
+ setPlayerName(2,"CPU 2（"+seatWind(2%activeSeats())+"）");
+ setPlayerName(3,"CPU 3（"+seatWind(3%activeSeats())+"）");
  renderMelds();
  for(let p=0;p<4;p++){
   let e=document.getElementById("playerScore"+p);
   if(e){e.hidden=p>=activeSeats();if(p<activeSeats())e.textContent=points[p].toLocaleString()+"点"}
  }
- document.querySelector("#player3 .name").textContent="CPU 3（"+seatWind(3%activeSeats())+"）";
- document.querySelector(".left .name").textContent="CPU 1（"+seatWind(1%activeSeats())+"）";
- document.querySelector(".right .name").textContent="CPU 2（"+seatWind(2%activeSeats())+"）";
- document.querySelector(".bottom .name").textContent="あなた（"+seatWind(0)+"）";
  let myTurn=current===0&&!busy&&!finished&&!pendingRon&&!callPending;
  let northReady=mode===3&&hands[0].some(isNorth)&&hands[0].length===14-melds[0].length*3;
  document.getElementById("northButton").hidden=!northReady||!!riichi[0];
