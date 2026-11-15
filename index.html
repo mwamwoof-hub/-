@@ -17,39 +17,150 @@ button{cursor:pointer;font:inherit}
 .mode-select button{padding:17px;border:2px solid #d2ae58;border-radius:12px;background:#294e40;color:white;font-size:18px;font-weight:bold}
 .status{text-align:center;padding:9px;color:#f1d98c;font-weight:bold;min-height:36px}
 .table{position:relative;width:96%;max-width:480px;height:min(610px,calc(100dvh - 340px));min-height:440px;margin:5px auto;background:radial-gradient(ellipse,#087b50,#005638 75%,#06432f);border:10px solid #704b2e;border-radius:30px;box-shadow:0 5px 18px #0008,inset 0 0 18px #0003;overflow:hidden}
+
 .player{position:absolute;display:flex;flex-direction:column;align-items:center;gap:3px;font-size:12px;z-index:3}
 .name{color:#f5e3a8;font-weight:bold;white-space:nowrap}
-.north-count{font-size:9px;color:#f5d77d;font-weight:normal;margin-left:2px;white-space:nowrap}
+.north-count{font-size:9px;color:#f5d77d;font-weight:normal;margin-left:3px;white-space:nowrap}
+
 .top{top:8px;left:50%;transform:translateX(-50%)}
 .left{left:-1%;top:34%;width:22%;height:235px;display:block}
 .right{right:-1%;top:34%;width:22%;height:235px;display:block}
 .bottom{bottom:7px;left:50%;transform:translateX(-50%);width:95%}
+
 .top .name{transform:rotate(180deg)}
-.left .name,.right .name{position:absolute;top:0;left:50%;width:max-content;text-align:center}
-.left .name{transform:translateX(-50%) rotate(90deg);transform-origin:center center}
-.right .name{transform:translateX(-50%) rotate(-90deg);transform-origin:center center}
+
+/* 左右CPUの名前と点数を外側の専用レーンに固定 */
+.left .name,.right .name{
+ position:absolute;
+ top:15px;
+ width:max-content;
+ max-width:none;
+ text-align:center;
+ z-index:5;
+}
+.left .name{
+ left:-35px;
+ transform:rotate(90deg);
+ transform-origin:center center;
+}
+.right .name{
+ right:-35px;
+ transform:rotate(-90deg);
+ transform-origin:center center;
+}
+
 .player-score{color:#fff2c1;font-size:13px;font-weight:bold;line-height:1.2;white-space:nowrap;text-shadow:0 1px 3px #000;padding:2px 5px}
 .top .player-score{transform:rotate(180deg)}
-.left .player-score,.right .player-score{position:absolute;top:45px;left:50%;width:max-content;text-align:center}
-.left .player-score{transform:translateX(-50%) rotate(90deg);transform-origin:center center}
-.right .player-score{transform:translateX(-50%) rotate(-90deg);transform-origin:center center}
+
+/* 点数も名前とは別の位置に固定 */
+.left .player-score,.right .player-score{
+ position:absolute;
+ top:155px;
+ width:max-content;
+ text-align:center;
+ z-index:5;
+}
+.left .player-score{
+ left:-35px;
+ transform:rotate(90deg);
+ transform-origin:center center;
+}
+.right .player-score{
+ right:-35px;
+ transform:rotate(-90deg);
+ transform-origin:center center;
+}
 .bottom .player-score{font-size:13px;text-align:center}
+
 .backhand{display:flex;justify-content:center;gap:3px;align-items:center;min-height:19px;flex-wrap:nowrap}
 .back{width:14px;height:10px;border:1px solid #e2c77e;background:linear-gradient(135deg,#dba94b,#a66c24);border-radius:3px;flex:0 0 14px;box-shadow:0 1px 2px #0008}
 .top .backhand{transform:rotate(180deg)}
-.left .backhand,.right .backhand{position:absolute;top:125px;left:50%;width:max-content;justify-content:center;gap:2px;margin:0;transform:translate(-50%,-50%) rotate(90deg);transform-origin:center center}
-.right .backhand{transform:translate(-50%,-50%) rotate(-90deg)}
-.left .meld-area,.right .meld-area{position:absolute;top:205px;left:50%;width:100%;transform:translateX(-50%);justify-content:center;align-items:center}
+
+/* 左右CPUの手牌を名前・点数から離して中央側へ */
+.left .backhand,.right .backhand{
+ position:absolute;
+ top:125px;
+ width:max-content;
+ justify-content:center;
+ gap:2px;
+ margin:0;
+ transform:translate(50%,-50%) rotate(90deg);
+ transform-origin:center center;
+}
+.left .backhand{left:90%}
+.right .backhand{
+ right:90%;
+ transform:translate(-50%,-50%) rotate(-90deg);
+}
+
+.left .meld-area,.right .meld-area{
+ position:absolute;
+ top:205px;
+ left:50%;
+ width:100%;
+ transform:translateX(-50%);
+ justify-content:center;
+ align-items:center;
+}
 .north-area{display:none!important}
-.river{position:absolute;display:flex;flex-wrap:wrap;justify-content:center;align-content:flex-start;gap:2px;min-height:50px;z-index:2;pointer-events:none}
+
+/* 捨て牌の配置 */
+.river{
+ position:absolute;
+ display:flex;
+ flex-wrap:wrap;
+ justify-content:center;
+ align-content:flex-start;
+ gap:1px;
+ min-height:50px;
+ z-index:2;
+ pointer-events:none;
+}
 #river3{top:27%;left:50%;transform:translateX(-50%);width:62%;max-width:none}
 #river3 .tile{transform:rotate(180deg)}
 #river0{bottom:27%;left:50%;transform:translateX(-50%);width:62%;max-width:none}
-#river1{top:50%;left:37%;transform:translate(-50%,-50%);width:30%;height:230px;flex-direction:column;flex-wrap:wrap;align-content:flex-start;justify-content:center}
+#river1{
+ top:50%;
+ left:37%;
+ transform:translate(-50%,-50%);
+ width:30%;
+ height:230px;
+ flex-direction:column;
+ flex-wrap:wrap;
+ align-content:flex-start;
+ justify-content:center;
+}
 #river1 .tile{transform:rotate(90deg)}
-#river2{top:50%;right:37%;transform:translate(50%,-50%);width:30%;height:230px;flex-direction:column;flex-wrap:wrap;align-content:flex-end;justify-content:center}
+#river2{
+ top:50%;
+ right:37%;
+ transform:translate(50%,-50%);
+ width:30%;
+ height:230px;
+ flex-direction:column;
+ flex-wrap:wrap;
+ align-content:flex-end;
+ justify-content:center;
+}
 #river2 .tile{transform:rotate(-90deg)}
-.tile{flex:0 0 auto;width:clamp(25px,6.5vw,34px);height:clamp(42px,11vw,53px);background:linear-gradient(110deg,#fffefb,#f5f0e5);color:#222;border:1px solid #c5c5c5;border-bottom:3px solid #b8b8b8;border-radius:4px;display:flex;align-items:center;justify-content:center;font-weight:bold;box-shadow:0 2px 3px #0007;position:relative;overflow:hidden}
+
+.tile{
+ flex:0 0 auto;
+ width:clamp(25px,6.5vw,34px);
+ height:clamp(42px,11vw,53px);
+ background:linear-gradient(110deg,#fffefb,#f5f0e5);
+ color:#222;
+ border:1px solid #c5c5c5;
+ border-bottom:3px solid #b8b8b8;
+ border-radius:4px;
+ display:flex;
+ align-items:center;
+ justify-content:center;
+ font-weight:bold;
+ box-shadow:0 2px 3px #0007;
+ position:relative;
+ overflow:hidden;
+}
 .tile::before{content:"";position:absolute;top:0;left:0;right:0;height:4px;background:linear-gradient(90deg,#b87918,#f2cf65,#b87918);z-index:2}
 .tile-face{width:100%;height:100%;display:flex;flex-direction:column;justify-content:center;align-items:center;line-height:1}
 .tile-number{font-size:clamp(12px,3.2vw,17px);font-weight:900}
@@ -72,15 +183,29 @@ button{cursor:pointer;font:inherit}
 .smalltile .tile-symbols{width:90%;height:90%}
 .smalltile .circle-symbol{width:65%;border-width:1px}
 .selected{transform:translateY(-8px);border:2px solid #e9b94e}
-.riichi-discard{outline:2px solid #e9b94e}
-.river .tile{width:clamp(18px,4.8vw,25px);height:clamp(30px,8vw,39px);border-radius:3px;border-bottom-width:2px}
-.river .tile::before{height:2px}
-.river .tile-number{font-size:clamp(9px,2.4vw,12px)}
-.river .tile-suit{font-size:clamp(10px,2.7vw,13px)}
-.river .tile-honor{font-size:clamp(13px,3.4vw,17px)}
+.riichi-discard{outline:1px solid #e9b94e}
+
+/* 捨て牌専用サイズ：手牌より大幅に小さく */
+.river .tile{
+ width:13px;
+ height:21px;
+ min-width:13px;
+ min-height:21px;
+ border-radius:2px;
+ border-width:1px;
+ border-bottom-width:1px;
+ box-shadow:0 1px 2px #0006;
+}
+.river .tile::before{height:1px}
+.river .tile-face{width:100%;height:100%}
+.river .tile-number{font-size:7px}
+.river .tile-suit{font-size:8px}
+.river .tile-honor{font-size:10px}
 .river .tile-symbols{width:88%;height:88%}
-.river .circle-symbol{border-width:1px}
-.river .bamboo-symbol{border-radius:2px}
+.river .circle-symbol{border-width:.7px}
+.river .bamboo-symbol{border-radius:1px;border-width:.5px}
+.river .bamboo-symbol:before,.river .bamboo-symbol:after{height:1px}
+
 .dora-area{position:absolute;top:8px;left:8px;display:flex;align-items:center;gap:4px;z-index:5;white-space:nowrap}
 .dora-label{font-size:11px;color:#f3dfa1;font-weight:bold}
 .dora-tile{width:18px;height:27px;background:linear-gradient(110deg,#fffef4,#f3edda);color:#2566b4;border:1px solid #b8ad91;border-bottom:2px solid #b8a98a;border-radius:3px;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:bold;overflow:hidden}
@@ -89,6 +214,7 @@ button{cursor:pointer;font:inherit}
 .dora-tile .tile-honor{font-size:12px}
 .dora-tile .tile-symbols{width:90%;height:90%}
 .dora-tile .circle-symbol{border-width:1px}
+
 .round-counter{position:absolute;top:48px;left:8px;z-index:5;display:flex;flex-direction:column;gap:4px;color:#f6e5ad;font-size:12px;font-weight:bold;white-space:nowrap;text-shadow:0 1px 3px #000;background:#123c30b8;padding:4px 6px;border-radius:5px}
 .round-counter span{display:block}
 .meld-area{display:flex;justify-content:center;gap:3px;flex-wrap:wrap;min-height:20px;margin:3px 0;align-items:center}
@@ -102,9 +228,11 @@ button{cursor:pointer;font:inherit}
 .meld-tile .circle-symbol{border-width:1px}
 .meld-tile .bamboo-symbol{border-radius:2px}
 #meld0{position:absolute;right:0;bottom:0;justify-content:flex-end;max-width:55%;z-index:3}
+
 .center{position:absolute;top:51%;left:50%;transform:translate(-50%,-50%);text-align:center;width:34%;pointer-events:none;z-index:1}
 .round{color:#f6e5ad;font-size:19px;font-weight:bold}
 .centerinfo{font-size:13px;margin-top:7px}
+
 .handarea{position:fixed;bottom:0;left:0;right:0;background:#172d26;padding:9px 3px calc(10px + env(safe-area-inset-bottom));border-top:2px solid #8b7047;z-index:5}
 .handtitle{display:flex;justify-content:space-between;padding:0 7px 7px;font-size:14px;color:#e6d5a6}
 .hand{display:flex;justify-content:center;gap:2px;overflow-x:auto;padding:4px 0 9px}
@@ -128,21 +256,32 @@ button{cursor:pointer;font:inherit}
 .result-detail{text-align:center;color:#f5e4b4;font-size:14px;line-height:1.8;margin-bottom:12px}
 .result-line{display:flex;justify-content:space-between;gap:10px;padding:4px 0;font-size:13px}
 .result-close{display:block;width:100%;margin-top:15px;padding:11px;border:0;border-radius:8px;background:#d1ae5e;color:#1c2c23;font-weight:bold}
-@media(max-height:700px){.table{height:440px;min-height:400px}}
+
+@media(max-height:700px){
+ .table{height:440px;min-height:400px}
+}
 @media(max-width:380px){
-.left,.right{width:23%}
-.left .backhand{top:125px;transform:translate(-50%,-50%) rotate(90deg);gap:1px}
-.right .backhand{top:125px;transform:translate(-50%,-50%) rotate(-90deg);gap:1px}
-.back{width:12px;height:9px;flex-basis:12px}
-.center{width:32%}
-.actions button{padding:8px 9px}
-.hand .drawn-tile{margin-left:8px}
-.tile{width:clamp(23px,6.1vw,29px)}
-.round-counter{font-size:10px}
-#river1{left:35%;width:29%;height:210px}
-#river2{right:35%;width:29%;height:210px}
-.player-score{font-size:13px}
-.dora-tile{width:18px;height:27px}
+ .left,.right{width:23%}
+ .left .name{left:-38px}
+ .right .name{right:-38px}
+ .left .player-score{left:-38px}
+ .right .player-score{right:-38px}
+ .left .backhand{left:90%;top:125px;transform:translate(50%,-50%) rotate(90deg);gap:1px}
+ .right .backhand{right:90%;top:125px;transform:translate(-50%,-50%) rotate(-90deg);gap:1px}
+ .back{width:12px;height:9px;flex-basis:12px}
+ .center{width:32%}
+ .actions button{padding:8px 9px}
+ .hand .drawn-tile{margin-left:8px}
+ .tile{width:clamp(23px,6.1vw,29px)}
+ .round-counter{font-size:10px}
+ #river1{left:35%;width:29%;height:210px}
+ #river2{right:35%;width:29%;height:210px}
+ .player-score{font-size:13px}
+ .dora-tile{width:18px;height:27px}
+ .river .tile{width:12px;height:20px;min-width:12px;min-height:20px}
+ .river .tile-number{font-size:6px}
+ .river .tile-suit{font-size:7px}
+ .river .tile-honor{font-size:9px}
 }
 </style>
 </head>
@@ -181,27 +320,33 @@ button{cursor:pointer;font:inherit}
 <div class="table">
 <div class="dora-area"><span class="dora-label">ドラ</span><div class="dora-tile" id="doraIndicator">?</div></div>
 <div class="round-counter"><span id="honbaDisplay">0本場</span><span id="riichiDisplay">供託 0本</span></div>
+
 <div class="player top" id="player3">
 <div class="name">CPU 3（北）</div><div class="player-score" id="playerScore3">25000点</div>
 <div class="backhand" id="back3"></div><div class="north-area" id="north3"></div><div class="meld-area" id="meld3"></div>
 </div>
+
 <div class="player left">
 <div class="name">CPU 1（西）</div><div class="player-score" id="playerScore1">25000点</div>
 <div class="backhand" id="back1"></div><div class="north-area" id="north1"></div><div class="meld-area" id="meld1"></div>
 </div>
+
 <div class="player right">
 <div class="name">CPU 2（南）</div><div class="player-score" id="playerScore2">25000点</div>
 <div class="backhand" id="back2"></div><div class="north-area" id="north2"></div><div class="meld-area" id="meld2"></div>
 </div>
+
 <div class="player bottom">
 <div class="north-area" id="north0"></div><div class="meld-area" id="meld0"></div>
 <div class="name">あなた（東）</div><div class="player-score" id="playerScore0">25000点</div>
 </div>
+
 <div class="river" id="river3"></div><div class="river" id="river1"></div><div class="river" id="river2"></div><div class="river" id="river0"></div>
 <div class="center">
 <div class="round" id="round">東一局</div><div style="font-size:25px;margin:6px">🀄</div><div id="wallinfo">残り牌：0</div>
 </div>
 </div>
+
 <div class="handarea">
 <div class="handtitle"><span>あなたの手牌</span><span id="count">0枚</span></div>
 <div class="hand" id="hand"></div>
@@ -219,6 +364,7 @@ button{cursor:pointer;font:inherit}
 </div>
 </div>
 </div>
+
 <script>
 "use strict";
 const honors=["東","南","西","北","白","發","中"],dragons=["白","發","中"],winds=["東","南","西","北"];
